@@ -7,12 +7,17 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
+<<<<<<< HEAD
         // Test comment from Jameel again
+=======
+        // Test comment from Jameel
+>>>>>>> eeb7558d54d62f6aaa0237898bcf306695c5bfcc
         //
         // Try running your application with "flutter run". You'll see the
         // application has a blue toolbar. Then, without quitting the app, try
