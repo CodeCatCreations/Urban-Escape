@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'progress_page.dart';
+import 'social_page.dart';
+import 'sounds_page.dart';
+import 'map_page.dart';
 
-//ändra
 void main() {
   runApp(const MyApp());
 }
@@ -13,9 +16,6 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
-        // Test comment from Joel
-        // Test comment from Jameel again
-        //
         // Try running your application with "flutter run". You'll see the
         // application has a blue toolbar. Then, without quitting the app, try
         // changing the primarySwatch below to Colors.green and then invoke
@@ -48,70 +48,6 @@ class MyHomePage extends StatefulWidget {
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
-class ProgressPage extends StatelessWidget {
-  const ProgressPage({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Progress"),
-      ),
-      body: const Center(
-        child: Text("This is the progress page."),
-      ),
-    );
-  }
-}
-
-class MapPage extends StatelessWidget {
-  const MapPage({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Map"),
-      ),
-      body: const Center(
-        child: Text("This is the map page."),
-      ),
-    );
-  }
-}
-
-class SharePage extends StatelessWidget {
-  const SharePage({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Share"),
-      ),
-      body: const Center(
-        child: Text("This is the share page."),
-      ),
-    );
-  }
-}
-
-class SettingsPage extends StatelessWidget {
-  const SettingsPage({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Settings"),
-      ),
-      body: const Center(
-        child: Text("This is the settings page."),
-      ),
-    );
-  }
-}
-
 class _MyHomePageState extends State<MyHomePage> {
   int _currentIndex = 0;
 
@@ -130,9 +66,10 @@ class _MyHomePageState extends State<MyHomePage> {
         children: _pages,
       ),
       bottomNavigationBar: BottomNavigationBar(
+        type: BottomNavigationBarType.fixed,
         currentIndex: _currentIndex,
-        fixedColor: Colors.blue,
-        backgroundColor: Colors.yellow,
+        selectedItemColor: Colors.blue,
+        // backgroundColor: Colors.yellow,
         unselectedItemColor: Colors.green,
         onTap: (int index) {
           setState(() {
@@ -142,19 +79,19 @@ class _MyHomePageState extends State<MyHomePage> {
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Icon(Icons.show_chart),
-            label: 'Chart',
+            label: 'Progress',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.map),
             label: 'Map',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.share),
-            label: 'Share',
+            icon: Icon(Icons.music_note),
+            label: 'Sounds',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: 'Settings',
+            icon: Icon(Icons.people),
+            label: 'Social',
           ),
         ],
       ),
