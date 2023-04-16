@@ -13,6 +13,8 @@ class ProgressPageState extends State<ProgressPage> {
   int goal = 120;
   int animateDuration = 1000;
 
+  final _formKey = GlobalKey<FormState>();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -33,6 +35,52 @@ class ProgressPageState extends State<ProgressPage> {
                     IconButton(
                       icon: const Icon(Icons.flag),
                       onPressed: () {
+                        showDialog(
+                          context: context, 
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              content: Stack(
+                                children: <Widget>[
+                                  Positioned(
+                                    right: -40.0,
+                                    top: -40.0,
+                                    child: InkResponse(
+                                      onTap: () {
+                                        Navigator.of(context).pop();
+                                      },
+                                      child: const CircleAvatar(
+                                        backgroundColor: Colors.red,
+                                        child: Icon(Icons.close),
+                                      ),
+                                    ),
+                                  ),
+                                  Form(
+                                    key: _formKey,
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: <Widget>[
+                                        Padding(
+                                          padding: EdgeInsets.all(8.0),
+                                          child: TextFormField(),
+                                        ),
+                                        Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: ElevatedButton(
+                                            child: Text("Submit"),
+                                            onPressed: () {
+                                              if (_formKey.currentState!.validate()) {
+                                                _formKey.currentState!.save();
+                                              }
+                                            },
+                                          ),
+                                        )
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          });
                         setState(() {
                           goal += 1;
                           animateDuration = 0;
