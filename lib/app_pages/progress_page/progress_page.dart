@@ -98,6 +98,7 @@ class ProgressPageState extends State<ProgressPage> {
                                             controller: _textEditingController,
                                             validator: (value) {
                                               if ((value != null || value!.isEmpty) && int.tryParse(value) != null) {
+                                                if (int.parse(value) < 1) return 'Goal must be more than 0 minutes!';
                                                 return null;
                                               } return 'Requires a number without digits.';
                                             },
