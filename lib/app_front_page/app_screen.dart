@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:urban_escape_application/app_front_page/app_center_page.dart';
 import 'package:urban_escape_application/app_pages/settings_page.dart';
+import '../app_pages/progress_page/goal_storage.dart';
 import '../app_pages/progress_page/progress_page.dart';
 import '../app_pages/social_page.dart';
 import '../app_pages/sounds_page.dart';
@@ -22,7 +23,7 @@ class _AppScreenState extends State<AppScreen> {
 
 //List containing insatnces of each page in the app
   final List<Widget> _appPages = [
-    const ProgressPage(),
+    ProgressPage(storage: GoalStorage()),
     const MapPage(),
     const SoundsPage(),
     const SocialPage(),
