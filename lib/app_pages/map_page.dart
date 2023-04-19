@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:urban_escape_application/maria_sql_actions/maria_sql.dart';
+import 'package:urban_escape_application/database/maria_sql.dart';
 
 class MapPage extends StatefulWidget {
   const MapPage({super.key});
