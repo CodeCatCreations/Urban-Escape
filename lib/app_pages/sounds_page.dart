@@ -10,42 +10,42 @@ class SoundsPage extends StatelessWidget {
     return Scaffold(
       body: GridView.count(
         crossAxisCount: 2,
-        children: [
+        children: const [
           SoundWidget(
             icon: Icons.sunny,
             activatedColor: Colors.green,
             deactivatedColor: Colors.grey,
-            player: AudioPlayer(),
+            soundFilePath: "https://bigsoundbank.com/UPLOAD/mp3/0081.mp3",
           ),
           SoundWidget(
             icon: Icons.cloudy_snowing,
             activatedColor: Colors.green,
             deactivatedColor: Colors.grey,
-            player: AudioPlayer(),
+            soundFilePath: "https://bigsoundbank.com/UPLOAD/mp3/0140.mp3",
           ),
           SoundWidget(
             icon: Icons.waves,
             activatedColor: Colors.green,
             deactivatedColor: Colors.grey,
-            player: AudioPlayer(),
+            soundFilePath: "url",
           ),
           SoundWidget(
             icon: Icons.wine_bar,
             activatedColor: Colors.green,
             deactivatedColor: Colors.grey,
-            player: AudioPlayer(),
+            soundFilePath: "url",
           ),
           SoundWidget(
             icon: Icons.forest,
             activatedColor: Colors.green,
             deactivatedColor: Colors.grey,
-            player: AudioPlayer(),
+            soundFilePath: "url",
           ),
           SoundWidget(
             icon: Icons.beach_access,
             activatedColor: Colors.green,
             deactivatedColor: Colors.grey,
-            player: AudioPlayer(),
+            soundFilePath: "url",
           ),
         ],
       ),
@@ -57,14 +57,14 @@ class SoundWidget extends StatefulWidget {
   final IconData icon;
   final Color activatedColor;
   final Color deactivatedColor;
-  final AudioPlayer player;
+  final String soundFilePath;
 
   const SoundWidget({
     Key? key,
     required this.icon,
     required this.activatedColor,
     required this.deactivatedColor,
-    required this.player,
+    required this.soundFilePath,
   }) : super(key: key);
 
   @override
@@ -72,8 +72,15 @@ class SoundWidget extends StatefulWidget {
 }
 
 class _SoundWidgetState extends State<SoundWidget> {
+  late final AudioPlayer _audioPlayer;
   bool _isActivated = false;
   double _volume = 0.5;
+
+  @override
+  void initState() {
+    super.initState();
+    _audioPlayer = AudioPlayer();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -104,15 +111,38 @@ class _SoundWidgetState extends State<SoundWidget> {
   void _toggleSound() {
     setState(() {
       _isActivated = !_isActivated;
+      if (_isActivated) {
+        _playSound();
+      } else {
+        _stopSound();
+      }
     });
+  }
+
+  void _playSound() async {
+    await _audioPlayer.play(widget.soundFilePath, volume: _volume);
+  }
+
+
+
+  void _stopSound() {
+    _audioPlayer.stop();
   }
 
   void _setVolume(double volume) {
     setState(() {
       _volume = volume;
+      _audioPlayer.setVolume(volume);
     });
   }
+
+  @override
+  void dispose() {
+    _audioPlayer.dispose();
+    super.dispose();
+  }
 }
+
 
 class VolumeSlider extends StatelessWidget {
   final double value;
