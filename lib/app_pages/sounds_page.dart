@@ -15,37 +15,37 @@ class SoundsPage extends StatelessWidget {
             icon: Icons.sunny,
             activatedColor: Colors.green,
             deactivatedColor: Colors.grey,
-            soundFilePath: "https://bigsoundbank.com/UPLOAD/mp3/0081.mp3",
+            soundFilePath: "https://bigsoundbank.com/UPLOAD/mp3/0999.mp3", // Birds
           ),
           SoundWidget(
             icon: Icons.cloudy_snowing,
             activatedColor: Colors.green,
             deactivatedColor: Colors.grey,
-            soundFilePath: "https://bigsoundbank.com/UPLOAD/mp3/0140.mp3",
+            soundFilePath: "https://bigsoundbank.com/UPLOAD/mp3/0740.mp3", // Rain
           ),
           SoundWidget(
             icon: Icons.waves,
             activatedColor: Colors.green,
             deactivatedColor: Colors.grey,
-            soundFilePath: "url",
+            soundFilePath: "https://bigsoundbank.com/UPLOAD/mp3/0267.mp3", // Waves and birds
           ),
           SoundWidget(
-            icon: Icons.wine_bar,
+            icon: Icons.grass,
             activatedColor: Colors.green,
             deactivatedColor: Colors.grey,
-            soundFilePath: "url",
+            soundFilePath: "https://bigsoundbank.com/UPLOAD/mp3/0908.mp3", // Wind in tall grass
           ),
           SoundWidget(
             icon: Icons.forest,
             activatedColor: Colors.green,
             deactivatedColor: Colors.grey,
-            soundFilePath: "url",
+            soundFilePath: "https://bigsoundbank.com/UPLOAD/mp3/0100.mp3", // Forest
           ),
           SoundWidget(
-            icon: Icons.beach_access,
+            icon: Icons.fireplace,
             activatedColor: Colors.green,
             deactivatedColor: Colors.grey,
-            soundFilePath: "url",
+            soundFilePath: "https://bigsoundbank.com/UPLOAD/mp3/0987.mp3", // Fire
           ),
         ],
       ),
