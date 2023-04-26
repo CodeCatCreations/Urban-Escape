@@ -10,42 +10,42 @@ class SoundsPage extends StatelessWidget {
     return Scaffold(
       body: GridView.count(
         crossAxisCount: 2,
-        children: const [
+        children: [
           SoundWidget(
             icon: Icons.sunny,
             activatedColor: Colors.green,
             deactivatedColor: Colors.grey,
-            soundFilePath: "https://bigsoundbank.com/UPLOAD/mp3/0999.mp3", // Birds
+            soundFilePath: UrlSource('https://bigsoundbank.com/UPLOAD/mp3/0999.mp3'), // Birds
           ),
           SoundWidget(
             icon: Icons.cloudy_snowing,
             activatedColor: Colors.green,
             deactivatedColor: Colors.grey,
-            soundFilePath: "https://bigsoundbank.com/UPLOAD/mp3/0740.mp3", // Rain
+            soundFilePath: UrlSource('https://bigsoundbank.com/UPLOAD/mp3/0740.mp3'), // Rain
           ),
           SoundWidget(
             icon: Icons.waves,
             activatedColor: Colors.green,
             deactivatedColor: Colors.grey,
-            soundFilePath: "https://bigsoundbank.com/UPLOAD/mp3/0267.mp3", // Waves and birds
+            soundFilePath: UrlSource('https://bigsoundbank.com/UPLOAD/mp3/0267.mp3'), // Waves and birds
           ),
           SoundWidget(
             icon: Icons.grass,
             activatedColor: Colors.green,
             deactivatedColor: Colors.grey,
-            soundFilePath: "https://bigsoundbank.com/UPLOAD/mp3/0908.mp3", // Wind in tall grass
+            soundFilePath: UrlSource('https://bigsoundbank.com/UPLOAD/mp3/0908.mp3'), // Wind in tall grass
           ),
           SoundWidget(
             icon: Icons.forest,
             activatedColor: Colors.green,
             deactivatedColor: Colors.grey,
-            soundFilePath: "https://bigsoundbank.com/UPLOAD/mp3/0100.mp3", // Forest
+            soundFilePath: UrlSource('https://bigsoundbank.com/UPLOAD/mp3/0100.mp3'), // Forest
           ),
           SoundWidget(
             icon: Icons.fireplace,
             activatedColor: Colors.green,
             deactivatedColor: Colors.grey,
-            soundFilePath: "https://bigsoundbank.com/UPLOAD/mp3/0987.mp3", // Fire
+            soundFilePath: UrlSource('https://bigsoundbank.com/UPLOAD/mp3/0987.mp3'), // Fire
           ),
         ],
       ),
@@ -57,7 +57,7 @@ class SoundWidget extends StatefulWidget {
   final IconData icon;
   final Color activatedColor;
   final Color deactivatedColor;
-  final String soundFilePath;
+  final Source soundFilePath;
 
   const SoundWidget({
     Key? key,
@@ -120,9 +120,8 @@ class _SoundWidgetState extends State<SoundWidget> {
   }
 
   void _playSound() async {
-    await _audioPlayer.play(widget.soundFilePath, volume: _volume);
+    await _audioPlayer.play(widget.soundFilePath);
   }
-
 
 
   void _stopSound() {
