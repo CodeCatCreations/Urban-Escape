@@ -2,8 +2,10 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/percent_indicator.dart';
-import 'package:urban_escape_application/app_pages/progress_page/achievement_page.dart';
 
+import 'achievement_page.dart';
+import 'bar_chart.dart';
+import 'chart_container.dart';
 import 'goal_storage.dart';
 
 class ProgressPage extends StatefulWidget {
@@ -50,13 +52,14 @@ class ProgressPageState extends State<ProgressPage> {
     return PageView(
       scrollDirection: Axis.vertical,
       children: [
+        // First page
         Scaffold(
           body: Column(
             children: [
               Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(10),
-                  color: Colors.grey,
+                  color: const Color.fromARGB(255, 209, 209, 209),
                 ),
                 margin: const EdgeInsets.all(10.0),
                 padding: const EdgeInsets.all(10.0),
@@ -67,6 +70,7 @@ class ProgressPageState extends State<ProgressPage> {
                       children: [
                         IconButton(
                           icon: const Icon(Icons.flag),
+                          iconSize: 35,
                           onPressed: () {
                             showDialog(
                               context: context, 
@@ -130,14 +134,14 @@ class ProgressPageState extends State<ProgressPage> {
                           },
                         ),
                         const Text(
-                          'Set Goals',
+                          'Set Goals', textScaleFactor: 1.2,
                         ),
                       ],
                     ),
                     
                     const Center(
                       child: Text(
-                        'Weekly Progress',
+                        'Weekly Progress', textScaleFactor: 1.4,
                       ),
                     ),
                     Padding(
@@ -146,16 +150,21 @@ class ProgressPageState extends State<ProgressPage> {
                         width: MediaQuery.of(context).size.width - 50.0,
                         animation: true,
                         animationDuration: animateDuration,
-                        lineHeight: 20.0,
+                        lineHeight: 25.0,
                         percent: percent,
-                        center: Text((percent * 100).toString() + '%'),
+                        center: Text('${percent * 100}%', textScaleFactor: 1.2),
                         progressColor: Colors.green,
                       ),
                     ),
                     Center(
                       child: Text(
-                        '$minutes / $_goal minutes',
+                        '$minutes / $_goal minutes', textScaleFactor: 1.2,
                       ),
+                    ),
+                    ChartContainer(
+                      title: 'Daily goal',
+                      color: const Color.fromARGB(255, 41, 128, 38),
+                      chart: BarChartContent(),
                     ),
                   ],
                 ),
