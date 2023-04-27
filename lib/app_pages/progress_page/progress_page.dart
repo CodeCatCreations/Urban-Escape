@@ -138,7 +138,7 @@ class ProgressPageState extends State<ProgressPage> {
                               });
                           },
                         ),
-                        Expanded(
+                        const Expanded(
                           flex: 1,
                           child: SizedBox(),
                         ),
@@ -149,7 +149,7 @@ class ProgressPageState extends State<ProgressPage> {
                             onPressed: () {
                               pageController.animateToPage(
                                 1,
-                                duration: Duration(milliseconds: 1000),
+                                duration: const Duration(milliseconds: 1000),
                                 curve: Curves.ease,
                               );
                             },
