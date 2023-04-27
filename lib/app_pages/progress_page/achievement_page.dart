@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 class AchievementPage extends StatelessWidget {
+
   const AchievementPage({super.key});
 
   @override
@@ -15,9 +16,23 @@ class AchievementPage extends StatelessWidget {
         children: [
           Card(
             child: ListTile(
-              leading: Icon(
-                Icons.nature,
-                color: Colors.green[400],
+              leading: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.nature,
+                    color: Colors.green[400],
+                  ),
+                  const SizedBox(height: 4.0),
+                  Text(
+                    'Level 111',
+                    style: TextStyle(
+                      fontSize: 14.0,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                ],
               ),
               title: const Text(
                 'NatureLover',
@@ -29,19 +44,12 @@ class AchievementPage extends StatelessWidget {
               subtitle: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Level 111',
-                    style: TextStyle(
-                      fontSize: 14.0,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.grey[600],
-                    ),
-                  ),
                   const SizedBox(height: 8.0),
                   Row(
                     children: [
                       Expanded(
                         child: LinearProgressIndicator(
+                          // TODO: Get value from local_user
                           value: 0.8,
                           backgroundColor: Colors.grey[200]!,
                           valueColor: AlwaysStoppedAnimation<Color>(
@@ -57,11 +65,26 @@ class AchievementPage extends StatelessWidget {
               ),
             ),
           ),
+
           Card(
             child: ListTile(
-              leading: Icon(
-                Icons.flag,
-                color: Colors.blue[400],
+              leading: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.flag,
+                    color: Colors.blue[400],
+                  ),
+                  const SizedBox(height: 4.0),
+                  Text(
+                    'Level 0',
+                    style: TextStyle(
+                      fontSize: 14.0,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                ],
               ),
               title: const Text(
                 'Flag achievement',
@@ -73,14 +96,6 @@ class AchievementPage extends StatelessWidget {
               subtitle: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Level 0',
-                    style: TextStyle(
-                      fontSize: 14.0,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.grey[600],
-                    ),
-                  ),
                   const SizedBox(height: 8.0),
                   Row(
                     children: [
@@ -101,11 +116,27 @@ class AchievementPage extends StatelessWidget {
               ),
             ),
           ),
+
+
           Card(
             child: ListTile(
-              leading: Icon(
-                Icons.star,
-                color: Colors.deepOrange[400],
+              leading: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.star,
+                    color: Colors.deepOrange[400],
+                  ),
+                  const SizedBox(height: 4.0),
+                  Text(
+                    'Level 0',
+                    style: TextStyle(
+                      fontSize: 14.0,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                ],
               ),
               title: const Text(
                 'Streak',
@@ -117,14 +148,6 @@ class AchievementPage extends StatelessWidget {
               subtitle: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Level 0',
-                    style: TextStyle(
-                      fontSize: 14.0,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.grey[600],
-                    ),
-                  ),
                   const SizedBox(height: 8.0),
                   Row(
                     children: [
@@ -145,6 +168,7 @@ class AchievementPage extends StatelessWidget {
               ),
             ),
           ),
+
         ],
       ),
     );
