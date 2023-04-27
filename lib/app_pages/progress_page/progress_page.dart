@@ -47,10 +47,12 @@ class ProgressPageState extends State<ProgressPage> {
   Widget build(BuildContext context) {
     double percent = minutes / _goal;
     if (percent > 1.0) percent = 1.0;
-    final TextEditingController _textEditingController = TextEditingController();
+    final TextEditingController textEditingController = TextEditingController(text: _goal.toString());
+    final PageController pageController = PageController();
 
     return PageView(
       scrollDirection: Axis.vertical,
+      controller: pageController,
       children: [
         // First page
         Scaffold(
@@ -68,9 +70,11 @@ class ProgressPageState extends State<ProgressPage> {
                   children: [
                     Row(
                       children: [
-                        IconButton(
-                          icon: const Icon(Icons.flag),
-                          iconSize: 35,
+                        TextButton.icon(
+                          icon: const Icon(Icons.flag, size: 35),
+                          label: const Text(
+                            'Set Goals', textScaleFactor: 1.2,
+                          ),
                           onPressed: () {
                             showDialog(
                               context: context, 
@@ -103,7 +107,7 @@ class ProgressPageState extends State<ProgressPage> {
                                             Padding(
                                               padding: const EdgeInsets.all(8.0),
                                               child: TextFormField(
-                                                controller: _textEditingController,
+                                                controller: textEditingController,
                                                 validator: (value) {
                                                   if ((value != null || value!.isEmpty) && int.tryParse(value) != null) {
                                                     if (int.parse(value) < 1) return 'Goal must be more than 0 minutes!';
@@ -119,7 +123,8 @@ class ProgressPageState extends State<ProgressPage> {
                                                 onPressed: () {
                                                   if (_formKey.currentState!.validate()) {
                                                     _formKey.currentState!.save();
-                                                    _setGoal(int.parse(_textEditingController.text));
+                                                    _setGoal(int.parse(textEditingController.text));
+                                                    Navigator.of(context).pop();
                                                   }
                                                 },
                                               ),
@@ -133,10 +138,26 @@ class ProgressPageState extends State<ProgressPage> {
                               });
                           },
                         ),
-                        const Text(
-                          'Set Goals', textScaleFactor: 1.2,
+                        Expanded(
+                          flex: 1,
+                          child: SizedBox(),
                         ),
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: IconButton(
+                            icon: const Icon(Icons.emoji_events, size: 35, color: Color.fromARGB(255, 226, 171, 7), ),
+                            onPressed: () {
+                              pageController.animateToPage(
+                                1,
+                                duration: Duration(milliseconds: 1000),
+                                curve: Curves.ease,
+                              );
+                            },
+                          ),
+                        ),
+                        
                       ],
+
                     ),
                     
                     const Center(
@@ -152,7 +173,7 @@ class ProgressPageState extends State<ProgressPage> {
                         animationDuration: animateDuration,
                         lineHeight: 25.0,
                         percent: percent,
-                        center: Text('${percent * 100}%', textScaleFactor: 1.2),
+                        center: Text('${(percent * 100).toStringAsFixed(0)}%', textScaleFactor: 1.2),
                         progressColor: Colors.green,
                       ),
                     ),
