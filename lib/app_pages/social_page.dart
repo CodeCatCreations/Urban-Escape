@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 
 class SocialPage extends StatefulWidget {
   const SocialPage({Key? key}) : super(key: key);
@@ -8,12 +9,66 @@ class SocialPage extends StatefulWidget {
 }
 
 class _SocialPageState extends State<SocialPage> {
+  Map<String, dynamic>? _userData;
+  AccessToken? _accessToken;
+  bool _checking = true;
+
   final List<Person> _people = [
     Person('Sam Salmi', 'XamXalmi@example.com'),
     Person('Emily Garcia', 'emily.garcia@example.com'),
     Person('Benjamin Lee', 'benjamin.lee@example.com'),
     Person('Sophia Patel', 'sophia.patel@example.com'),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _checkIfLoggedIn();
+  }
+
+  _checkIfLoggedIn() async {
+    final accessToken = await FacebookAuth.instance.accessToken;
+
+    setState(() {
+      _checking = false;
+    });
+
+    if (accessToken != null) {
+      print(accessToken.toJson());
+      final userData = await FacebookAuth.instance.getUserData();
+      _accessToken = accessToken;
+      setState(() {
+        _userData = userData;
+      });
+    } else {
+      _login();
+    }
+  }
+
+  _login() async {
+    final LoginResult result = await FacebookAuth.instance.login();
+
+    if (result.status == LoginStatus.success) {
+      _accessToken = result.accessToken;
+
+      final userData = await FacebookAuth.instance.getUserData();
+      _userData = userData;
+    } else {
+      print(result.status);
+      print(result.message);
+    }
+    setState(() {
+      _checking = false;
+    });
+  }
+
+  _logout() async {
+    await FacebookAuth.instance.logOut();
+    _accessToken = null;
+    _userData = null;
+
+    setState(() {});
+  }
 
   void _addPerson(String name, String email) {
     setState(() {
@@ -117,7 +172,6 @@ class _SocialPageState extends State<SocialPage> {
     );
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -132,6 +186,13 @@ class _SocialPageState extends State<SocialPage> {
         backgroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
+        leading: TextButton(
+          onPressed: _userData != null ? _logout : _login,
+          child: Text(
+            _userData != null ? 'LOG OUT' : 'LOG IN',
+            style: const TextStyle(color: Colors.blue),
+          ),
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.person_add, color: Colors.blue),
@@ -139,6 +200,13 @@ class _SocialPageState extends State<SocialPage> {
               _showAddPersonDialog(context);
             },
           ),
+          /*CupertinoButton(
+            onPressed: _userData != null ? _logout : _login,
+            child: Text(
+              _userData != null ? 'LOG OUT' : 'LOG IN',
+              style: const TextStyle(color: Colors.blue),
+            ),
+          ),*/
         ],
       ),
       body: SingleChildScrollView(
@@ -160,7 +228,7 @@ class _SocialPageState extends State<SocialPage> {
   }
 }
 
-  class Person {
+class Person {
   final String name;
   final String email;
 
