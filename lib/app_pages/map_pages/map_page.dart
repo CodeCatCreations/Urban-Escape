@@ -16,8 +16,11 @@ class _MapPageState extends State<MapPage> {
   late GoogleMapController mapController;
   //List<LatLng> polygonPoints = [];
   bool showParks = false;
-  final Set<Marker> markers = {};
-  
+
+
+  final Set<Marker> parkMarkers = {};
+  final Set<Marker> savedMarkers = {};
+
   final List<LatLng> polygonPoints = [
     LatLng(59.31363187438705, 17.997699807602697),
     LatLng(59.313631872485, 17.997594455279266),
@@ -57,7 +60,7 @@ class _MapPageState extends State<MapPage> {
               title: row['name'],
             ),
           );
-          markers.add(marker);
+          parkMarkers.add(marker);
         }
       });
     } catch (error) {
@@ -98,6 +101,8 @@ class _MapPageState extends State<MapPage> {
 
   @override
   Widget build(BuildContext context) {
+    final Set<Marker> allMarkers = {...parkMarkers, ...savedMarkers};
+
     return Scaffold(
       body: GoogleMap(
         initialCameraPosition: const CameraPosition(
@@ -107,7 +112,7 @@ class _MapPageState extends State<MapPage> {
         onMapCreated: (controller) {
           mapController = controller;
         },
-        markers: showParks ? markers : <Marker>{},
+        markers: showParks ? allMarkers : savedMarkers,
         polygons: {
           Polygon(
             polygonId: const PolygonId('polygon'),
@@ -118,18 +123,55 @@ class _MapPageState extends State<MapPage> {
           ),
         },
       ),
-      floatingActionButton: Align(
-          alignment: Alignment.bottomLeft,
-          child: Padding(
-            padding: const EdgeInsets.only(left: 16.0, bottom: 16.0),
-            child: FloatingActionButton(onPressed: () {
-              setState(() {
-                showParks = !showParks;
-              });
-            },
-            child: Icon(showParks?Icons.visibility:Icons.visibility_off),
+      floatingActionButton: Stack(
+        children: [
+          Positioned(
+            bottom: 16.0,
+            left: 16.0,
+            child: FloatingActionButton(
+              onPressed: () {
+                setState(() {
+                  showParks = !showParks;
+                });
+              },
+              child: Icon(showParks ? Icons.visibility : Icons.visibility_off),
             ),
-          )),
+          ),
+          Positioned(
+            bottom: 85.0,
+            left: 16.0,
+            child: FloatingActionButton(
+              onPressed: () async {
+                // Get the center coordinates of the map view
+                LatLng center = await mapController.getLatLng(
+                  const ScreenCoordinate(x: 500, y: 500)
+                );
+
+                // Create the marker at the center coordinates
+                Marker marker = Marker(
+                  markerId: MarkerId('pin-${savedMarkers.length + 1}'),
+                  position: center,
+                  draggable: true,
+                  onDragEnd: (newPosition) {
+                    // Handle marker drag event
+                  },
+                );
+
+                // Add the marker to the map
+                setState(() {
+                  savedMarkers.add(marker);
+                });
+
+
+
+              },
+
+              child: const Icon(Icons.add),
+            ),
+
+          ),
+        ],
+      ),
     );
   }
 }
