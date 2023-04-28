@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:urban_escape_application/app_front_page/app_screen.dart';
-
+import 'package:urban_escape_application/database/local_user.dart';
 
 void main() {
   runApp(const UrbanEscape());
@@ -11,6 +11,7 @@ class UrbanEscape extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final user = LocalUser();
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Urban Escape',
