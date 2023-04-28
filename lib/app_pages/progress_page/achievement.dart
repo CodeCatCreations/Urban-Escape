@@ -6,14 +6,15 @@ class Achievement extends GestureDetector {
   final String title;
   final double percent = 0.8;
   final String description;
-  final int level;
+  final int maxLevel;
+  int level = 0;
   final Icon icon;
 
   Achievement({
     Key? key,
     required this.title,
     required this.description,
-    required this.level,
+    required this.maxLevel,
     required this.icon,
   }) : super(key: key);
 
@@ -26,13 +27,10 @@ class Achievement extends GestureDetector {
                 leading: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(
-                      Icons.nature,
-                      color: Colors.green[400],
-                    ),
+                    icon,
                     const SizedBox(height: 4.0),
                     Text(
-                      level.toString(),
+                      "Level $level",
                       style: TextStyle(
                         fontSize: 14.0,
                         fontWeight: FontWeight.bold,
