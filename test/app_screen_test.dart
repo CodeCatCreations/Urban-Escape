@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:urban_escape_application/app_front_page/app_screen.dart';
-import 'package:urban_escape_application/app_pages/map_page.dart';
+import 'package:urban_escape_application/app_pages/map_pages/map_page.dart';
 import 'package:urban_escape_application/app_pages/sounds_page.dart';
 import 'package:urban_escape_application/app_pages/social_page.dart';
 import 'package:urban_escape_application/app_pages/progress_page/progress_page.dart';
