@@ -200,13 +200,6 @@ class _SocialPageState extends State<SocialPage> {
               _showAddPersonDialog(context);
             },
           ),
-          /*CupertinoButton(
-            onPressed: _userData != null ? _logout : _login,
-            child: Text(
-              _userData != null ? 'LOG OUT' : 'LOG IN',
-              style: const TextStyle(color: Colors.blue),
-            ),
-          ),*/
         ],
       ),
       body: SingleChildScrollView(
