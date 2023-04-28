@@ -99,6 +99,40 @@ class _MapPageState extends State<MapPage> {
     //fetchPolygonPoints();
   }
 
+  void createSavedMarker(LatLng position) {
+    bool markerDragged = false;
+    setState(() {
+      savedMarkers.add(
+        Marker(
+          markerId: MarkerId('saved-${savedMarkers.length + 1}'),
+          position: position,
+          draggable: true, // Set draggable to true for initially created markers
+          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
+          onDragEnd: (LatLng newPosition) {
+
+            if (!markerDragged) {
+              setState(() {
+                markerDragged = true;
+              });
+            }
+
+            // When a marker is dragged to a new position, update the marker's position in the set
+            savedMarkers.removeWhere((marker) => marker.markerId == MarkerId('saved-${savedMarkers.length + 1}'));
+            savedMarkers.add(
+              Marker(
+                markerId: MarkerId('saved-${savedMarkers.length + 1}'),
+                position: newPosition,
+                draggable: false, // Set draggable to false for dragged markers
+                icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueMagenta),
+              ),
+            );
+
+          },
+        ),
+      );
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final Set<Marker> allMarkers = {...parkMarkers, ...savedMarkers};
@@ -146,24 +180,7 @@ class _MapPageState extends State<MapPage> {
                 LatLng center = await mapController.getLatLng(
                   const ScreenCoordinate(x: 500, y: 500)
                 );
-
-                // Create the marker at the center coordinates
-                Marker marker = Marker(
-                  markerId: MarkerId('pin-${savedMarkers.length + 1}'),
-                  position: center,
-                  draggable: true,
-                  onDragEnd: (newPosition) {
-                    // Handle marker drag event
-                  },
-                );
-
-                // Add the marker to the map
-                setState(() {
-                  savedMarkers.add(marker);
-                });
-
-
-
+                createSavedMarker(center);
               },
 
               child: const Icon(Icons.add),
