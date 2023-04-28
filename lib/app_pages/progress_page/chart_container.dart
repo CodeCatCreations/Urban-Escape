@@ -17,7 +17,7 @@ class ChartContainer extends StatelessWidget {
     return Center(
       child: Container(
         width: MediaQuery.of(context).size.width * 0.95,
-        height: MediaQuery.of(context).size.width * 0.85,
+        height: MediaQuery.of(context).size.height * 0.55,
         padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
         decoration: BoxDecoration(
           color: color,
@@ -33,11 +33,7 @@ class ChartContainer extends StatelessWidget {
                   fontSize: 18,
                   fontWeight: FontWeight.bold),
             ),
-            Expanded(
-                child: Container(
-              padding: const EdgeInsets.only(top: 10),
-              child: chart,
-            ))
+            chart,
           ],
         ),
       ),
