@@ -1,0 +1,1 @@
+INSERT INTO multiPolygon (id) VALUES (1);

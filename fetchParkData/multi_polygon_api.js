@@ -3,59 +3,76 @@ const fs = require('fs');
 const parseString = require('xml2js').parseString;
 
 const options = {
-  headers: {
-    'Accept': 'application/xml'
-  }
+    headers: {
+        'Accept': 'application/xml'
+    }
 };
 
-https.get('https://miljodataportalen.stockholm.se/api/buller-2022-vagtagflygleq24h?$limit=50&$offset=1', options, (response) => {
-  let data = '';
+https.get('https://miljodataportalen.stockholm.se/api/buller-2022-vagtagflygleq24h?$limit=5&$offset=0', options, (response) => {
+    let data = '';
 
-  response.on('data', (chunk) => {
-    data += chunk;
-  });
-
-  response.on('end', () => {
-    parseString(data, (err, result) => {
-      if (err) throw err;
-
-      const geoms = result.miljodata.table[0].record.map((record) => record.geom[0]);
-
-      const polygons = [];
-      const coordinates = [];
-
-      let currentId = 1;
-      for (const geom of geoms) {
-        const openingParensIndex = geom.indexOf('((');
-        const closingParensIndex = geom.lastIndexOf('))');
-        const subGeom = geom.substring(openingParensIndex + 2, closingParensIndex);
-        if (!geom.includes("EMPTY") && subGeom.indexOf('((') === -1 && subGeom.indexOf(')') === -1) {
-          const coords = subGeom.split(',').map(coord => coord.trim().split(' '));
-          polygons.push(`INSERT INTO polygons (id, name) VALUES (${currentId}, 'Polygon ${currentId}');`);
-          for (let i = 0; i < coords.length; i++) {
-            const coordinatesData = coords[i];
-            let [lat, lng] = SWEREF99_18_00toWGS84(coordinatesData[1], coordinatesData[0]); // Convert coordinates to WGS84
-            coordinates.push(`INSERT INTO coordinates (polygon_id, latitude, longitude) VALUES (${currentId}, ${lat}, ${lng});`);
-          }
-          currentId++;
-        }
-      }
-
-      // Write the polygons and coordinates to files
-      fs.writeFile('polygons.sql', polygons.join('\n'), (err) => {
-        if (err) throw err;
-        console.log('Polygons written to polygons.sql');
-      });
-
-      fs.writeFile('coordinates.sql', coordinates.join('\n'), (err) => {
-        if (err) throw err;
-        console.log('Coordinates written to coordinates.sql');
-      });
+    response.on('data', (chunk) => {
+        data += chunk;
     });
-  });
+
+    response.on('end', () => {
+        parseString(data, (err, result) => {
+            if (err) throw err;
+
+            const geoms = result.miljodata.table[0].record.map((record) => record.geom[0]);
+
+            const multiPolygons = [];
+            const polygonToMultiPolygon = [];
+
+            let currentMultiPolygonId = 1;
+            let currentPolygonId = 1;
+
+            for (const geom of geoms) {
+                const openingParensIndex = geom.indexOf('((');
+                const closingParensIndex = geom.lastIndexOf('))');
+                const subGeom = geom.substring(openingParensIndex + 2, closingParensIndex);
+
+                if (subGeom.indexOf('((') !== -1 || subGeom.indexOf(')') !== -1) {
+                    const coords = [];
+                    const regex = /([0-9.]+) ([0-9.]+)/g;
+                    let match;
+                    while ((match = regex.exec(subGeom)) !== null) {
+                        coords.push([match[1], match[2]]);
+                    }
+                    multiPolygons.push(`INSERT INTO multiPolygon (id) VALUES (${currentMultiPolygonId});`);
+                    for (let i = 0; i < coords.length; i++) {
+                        currentPolygonId = 1; // Reset polygon_id for each new polygon
+                        const coordinatesData = coords[i];
+                        let [lat, lng] = SWEREF99_18_00toWGS84(coordinatesData[1], coordinatesData[0]); // Convert coordinates to WGS84
+                        polygonToMultiPolygon.push(`INSERT INTO polygonToMultiPolygon (multipolygon_id, polygon_id, latitude, longitude) VALUES (${currentMultiPolygonId}, ${currentPolygonId}, ${lat}, ${lng});`);
+                        if (i === coords.length - 1) {
+                            currentPolygonId++;
+                        }
+                    }
+                    currentMultiPolygonId++;
+                }
+            }
+
+            // Write the multiPolygons to a file
+            fs.writeFile('multiPolygon.sql', multiPolygons.join('\n'), (err) => {
+                if (err) throw err;
+                console.log('MultiPolygons written to multiPolygon.sql');
+            });
+
+            // Write the polygonToMultiPolygon to a file
+            fs.writeFile('polygonToMultiPolygon.sql', polygonToMultiPolygon.join('\n'), (err) => {
+                if (err) throw err;
+                console.log('polygonToMultiPolygon written to polygonToMultiPolygon.sql');
+            });
+        });
+    });
 }).on('error', (err) => {
-  console.log('Error: ' + err.message);
+    console.log('Error: ' + err.message);
 });
+
+
+
+
 
 
 
@@ -83,62 +100,6 @@ https.get('https://miljodataportalen.stockholm.se/api/buller-2022-vagtagflygleq2
 
       const geoms = result.miljodata.table[0].record.map((record) => record.geom[0]);
 
-      const polygons = [];
-
-      let currentId = 1;
-      for (const geom of geoms) {
-        const openingParensIndex = geom.indexOf('((');
-        const closingParensIndex = geom.lastIndexOf('))');
-        const subGeom = geom.substring(openingParensIndex + 2, closingParensIndex);
-        if (!geom.includes("EMPTY") && subGeom.indexOf('((') === -1 && subGeom.indexOf(')') === -1) {
-          const coords = subGeom.split(',').map(coord => coord.trim().split(' '));
-          for (let i = 0; i < coords.length; i++) {
-            const coordinates = coords[i];
-            let [lat, lng] = SWEREF99_18_00toWGS84(coordinates[1], coordinates[0]); // Convert coordinates to WGS84
-            polygons.push(`INSERT INTO polygons (id, latitude, longitude) VALUES (${currentId}, ${lat}, ${lng});`);
-          }
-          currentId++;
-        }
-      }
-
-      // Write the polygons to a file
-      fs.writeFile('polygons.sql', polygons.join('\n'), (err) => {
-        if (err) throw err;
-        console.log('Polygons written to polygons.sql');
-      });
-    });
-  });
-}).on('error', (err) => {
-  console.log('Error: ' + err.message);
-});
-*/
-
-
-/*
-const https = require('https');
-const fs = require('fs');
-const parseString = require('xml2js').parseString;
-
-const options = {
-  headers: {
-    'Accept': 'application/xml'
-  }
-};
-
-https.get('https://miljodataportalen.stockholm.se/api/buller-2022-vagtagflygleq24h?$limit=50&$offset=1', options, (response) => {
-  let data = '';
-
-  response.on('data', (chunk) => {
-    data += chunk;
-  });
-
-  response.on('end', () => {
-    parseString(data, (err, result) => {
-      if (err) throw err;
-
-      const geoms = result.miljodata.table[0].record.map((record) => record.geom[0]);
-
-      const polygons = [];
       const multiPolygons = [];
 
       for (const geom of geoms) {
@@ -147,18 +108,8 @@ https.get('https://miljodataportalen.stockholm.se/api/buller-2022-vagtagflygleq2
         const subGeom = geom.substring(openingParensIndex + 2, closingParensIndex);
         if (subGeom.indexOf('((') !== -1 || subGeom.indexOf(')') !== -1) {
           multiPolygons.push(geom);
-        } else {
-          if (!geom.includes("EMPTY")) {
-            polygons.push(geom);
-          }
         }
       }
-
-      // Write the polygons to a file
-      fs.writeFile('polygons.txt', polygons.join('\n'), (err) => {
-        if (err) throw err;
-        console.log('Polygons written to polygons.txt');
-      });
 
       // Write the multiPolygons to a file
       fs.writeFile('multiPolygons.txt', multiPolygons.join('\n'), (err) => {

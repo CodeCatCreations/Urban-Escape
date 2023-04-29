@@ -1,0 +1,16 @@
+INSERT INTO polygonToMultiPolygon (multipolygon_id, polygon_id, latitude, longitude) VALUES (1, 1, 59.255251098505, 18.11463763979191);
+INSERT INTO polygonToMultiPolygon (multipolygon_id, polygon_id, latitude, longitude) VALUES (1, 1, 59.25525111394012, 18.114620111141484);
+INSERT INTO polygonToMultiPolygon (multipolygon_id, polygon_id, latitude, longitude) VALUES (1, 1, 59.255260090620055, 18.114620141279158);
+INSERT INTO polygonToMultiPolygon (multipolygon_id, polygon_id, latitude, longitude) VALUES (1, 1, 59.2552690673, 18.11462017141684);
+INSERT INTO polygonToMultiPolygon (multipolygon_id, polygon_id, latitude, longitude) VALUES (1, 1, 59.25526905186486, 18.114637700076486);
+INSERT INTO polygonToMultiPolygon (multipolygon_id, polygon_id, latitude, longitude) VALUES (1, 1, 59.255269036427386, 18.114655228736115);
+INSERT INTO polygonToMultiPolygon (multipolygon_id, polygon_id, latitude, longitude) VALUES (1, 1, 59.2552600443076, 18.11467272724421);
+INSERT INTO polygonToMultiPolygon (multipolygon_id, polygon_id, latitude, longitude) VALUES (1, 1, 59.255251083067535, 18.11465516844233);
+INSERT INTO polygonToMultiPolygon (multipolygon_id, polygon_id, latitude, longitude) VALUES (1, 1, 59.255251098505, 18.11463763979191);
+INSERT INTO polygonToMultiPolygon (multipolygon_id, polygon_id, latitude, longitude) VALUES (1, 1, 59.255260059747485, 18.114655198589208);
+INSERT INTO polygonToMultiPolygon (multipolygon_id, polygon_id, latitude, longitude) VALUES (1, 1, 59.25526905186486, 18.114637700076486);
+INSERT INTO polygonToMultiPolygon (multipolygon_id, polygon_id, latitude, longitude) VALUES (1, 1, 59.255260075184935, 18.114637669934186);
+INSERT INTO polygonToMultiPolygon (multipolygon_id, polygon_id, latitude, longitude) VALUES (1, 1, 59.255260090620055, 18.114620141279158);
+INSERT INTO polygonToMultiPolygon (multipolygon_id, polygon_id, latitude, longitude) VALUES (1, 1, 59.255260075184935, 18.114637669934186);
+INSERT INTO polygonToMultiPolygon (multipolygon_id, polygon_id, latitude, longitude) VALUES (1, 1, 59.255251098505, 18.11463763979191);
+INSERT INTO polygonToMultiPolygon (multipolygon_id, polygon_id, latitude, longitude) VALUES (1, 1, 59.255260059747485, 18.114655198589208);

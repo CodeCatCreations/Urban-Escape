@@ -1,6 +1,17 @@
+
 import 'package:flutter/material.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 
+class SocialPage extends StatelessWidget {
+  const SocialPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container();
+  }
+}
+
+/*
 class SocialPage extends StatefulWidget {
   const SocialPage({Key? key}) : super(key: key);
 
@@ -234,3 +245,4 @@ class Person {
 
   Person(this.name, this.email);
 }
+*/
