@@ -88,21 +88,21 @@ class _MapPageState extends State<MapPage> {
   void createSavedMarker(LatLng position) {
     setState(() {
       // Check if the marker with the given MarkerId already exists in savedMarkers
-      if (savedMarkers.contains(Marker(markerId: MarkerId('saved-${savedMarkers.length + 1}')))) {
+      if (savedMarkers.contains(Marker(markerId: MarkerId(position.toString())))) {
         return;
       }
 
       savedMarkers.add(
         Marker(
-          markerId: MarkerId('saved-${savedMarkers.length + 1}'),
+          markerId: MarkerId(position.toString()),
           position: position,
           draggable: true,
           icon: magentaIcon,
           onDragEnd: (LatLng newPosition) {
-            savedMarkers.removeWhere((marker) => marker.markerId == MarkerId('saved-${savedMarkers.length + 1}'));
+            savedMarkers.removeWhere((marker) => marker.markerId == MarkerId(position.toString()));
             savedMarkers.add(
               Marker(
-                markerId: MarkerId('saved-${savedMarkers.length + 1}'),
+                markerId: MarkerId(newPosition.toString()),
                 position: newPosition,
                 draggable: false, // Set draggable to false for dragged markers
                 icon: blueIcon, // Change color to indicate that the marker cannot be dragged anymore
