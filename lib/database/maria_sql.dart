@@ -64,6 +64,32 @@ Future<Map<int, List<Map<String, dynamic>>>> fetchPolygons() async {
   return polygons;
 }
 
+Future<Map<int, List<Map<String, dynamic>>>> fetchMultipolygons() async {
+  final conn = await getConnection();
+  final results = await conn.query('''
+    SELECT p.id, c.latitude, c.longitude
+    FROM multipolygons p
+    INNER JOIN multicoordinates c ON p.id = c.polygon_id
+    ORDER BY p.id, c.id
+  ''');
+  await conn.close();
+  final polygons = <int, List<Map<String, dynamic>>>{};
+  int currentId = 0; // initialize to a default value
+  for (final row in results) {
+    final id = row['id'] as int;
+    final latitude = row['latitude'] as double;
+    final longitude = row['longitude'] as double;
+    if (currentId != id) {
+      currentId = id;
+      polygons[id] = [];
+    }
+    polygons[id]?.add({'latitude': latitude, 'longitude': longitude});
+  }
+  return polygons;
+}
+
+
+
 
 
 

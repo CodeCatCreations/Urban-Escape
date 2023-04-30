@@ -42,7 +42,7 @@ https.get('https://miljodataportalen.stockholm.se/api/buller-2022-vagtagleq24h/'
       }
 
       // Write the polygons and coordinates to files
-      fs.writeFile('polygons.sql', polygons.join('\n'), (err) => {
+      fs.writeFile('singlePolygons.sql', polygons.join('\n'), (err) => {
         if (err) throw err;
         console.log('Polygons written to polygons.sql');
       });

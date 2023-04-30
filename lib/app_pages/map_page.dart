@@ -11,14 +11,17 @@ class MapPage extends StatefulWidget {
 }
 
 class _MapPageState extends State<MapPage> {
+
   late GoogleMapController mapController;
- Set<Polygon> _polygoneSet = HashSet<Polygon>();
-  List<LatLng> polygonPoints = [];
+
   bool showParks = false;
   bool showPolygons = false;
   final Set<Marker> markers = {};
-
   List<Map<String, dynamic>>? parksData;
+
+ Set<Polygon> polygoneSet = HashSet<Polygon>();
+ Set<Polygon> multipolygonSet = HashSet<Polygon>();
+//List<LatLng> polygonPoints = [];
 
   //Fetch park data from MariaDB
   Future<void> fetchParksData() async {
@@ -44,6 +47,7 @@ class _MapPageState extends State<MapPage> {
     }
   }
 
+
   Future<void> fetchPolygonPoints() async {
     var mariaDB = MariaDB();
     final polygonData = await mariaDB.fetchPolygons();
@@ -57,12 +61,35 @@ class _MapPageState extends State<MapPage> {
       final polygon = Polygon(
         polygonId: PolygonId(id.toString()),
         points: polygonPoints,
-        fillColor: Colors.transparent,
-        strokeColor: Colors.red,
+        fillColor: Colors.red,
+        strokeColor: Colors.blue,
         strokeWidth: 4,
         geodesic: true,
       );
-      _polygoneSet.add(polygon);
+      polygoneSet.add(polygon);
+    });
+  }
+  
+
+    Future<void> fetchMultipolygonPoints() async {
+    var mariaDB = MariaDB();
+    final multiPolygonData = await mariaDB.fetchMultipolygons();
+    multiPolygonData.forEach((id, coordinates) {
+      final polygonPoints = <LatLng>[];
+      for (final coordinate in coordinates) {
+        final latitude = coordinate['latitude'];
+        final longitude = coordinate['longitude'];
+        polygonPoints.add(LatLng(latitude, longitude));
+      }
+      final polygon = Polygon(
+        polygonId: PolygonId(id.toString()),
+        points: polygonPoints,
+        fillColor: Colors.red,
+        strokeColor: Colors.blue,
+        strokeWidth: 4,
+        geodesic: true,
+      );
+      multipolygonSet.add(polygon);
     });
   }
 
@@ -73,6 +100,7 @@ class _MapPageState extends State<MapPage> {
     //Call fetchParksData() when our widget is created
     fetchParksData();
     fetchPolygonPoints();
+    fetchMultipolygonPoints();
   }
 /*
   // Function to add a polygon dynamically
@@ -100,14 +128,14 @@ class _MapPageState extends State<MapPage> {
     return Scaffold(
       body: GoogleMap(
         initialCameraPosition: const CameraPosition(
-          target: LatLng(59.331050938195126, 18.05937885027772),
-          zoom: 20,
+          target: LatLng(59.29796402722902, 18.12241581476829),
+          zoom: 15,
         ),
         onMapCreated: (controller) {
           mapController = controller;
         },
         markers: showParks ? markers : <Marker>{},
-        polygons: showPolygons ? _polygoneSet : <Polygon>{},
+        polygons: showPolygons ? multipolygonSet : <Polygon>{},
       ),
       floatingActionButton: Row(
         mainAxisAlignment: MainAxisAlignment.start,
