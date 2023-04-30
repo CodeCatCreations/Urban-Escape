@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:urban_escape_application/database/maria_sql.dart';
+import 'package:urban_escape_application/database//local_user.dart';
+
 
 class MapPage extends StatefulWidget {
   const MapPage({super.key});
@@ -20,7 +22,7 @@ class _MapPageState extends State<MapPage> {
 
 
   final Set<Marker> parkMarkers = {};
-  final Set<Marker> savedMarkers = {};
+  Set<Marker> savedMarkers = LocalUser.savedMarkers;
 
   final List<LatLng> polygonPoints = [
     LatLng(59.31363187438705, 17.997699807602697),
@@ -75,8 +77,11 @@ class _MapPageState extends State<MapPage> {
   void initState() {
     super.initState();
 
+    LocalUser().loadData();
+    savedMarkers = LocalUser.savedMarkers;
     //Call fetchParksData() when our widget is created
     fetchParksData();
+
     //fetchPolygonPoints();
   }
 
@@ -104,6 +109,7 @@ class _MapPageState extends State<MapPage> {
               ),
             );
             // Refresh the map to show the new marker color
+            LocalUser().saveData();
             setState(() {});
           },
         ),
