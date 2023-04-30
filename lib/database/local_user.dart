@@ -47,9 +47,17 @@ class LocalUser {
   Future <void> saveData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
+    saveDates(prefs);
+    saveMarkers(prefs);
+
+  }
+
+  void saveDates(SharedPreferences prefs) async {
     List<String> dates = _streakDates.map((date) => date.toIso8601String()).toList();
     await prefs.setStringList('streak_dates', dates);
+  }
 
+  void saveMarkers(SharedPreferences prefs) async {
     List<Map<String, dynamic>> markersList = savedMarkers.map((marker) {
       return {
         'markerId': marker.markerId.value,
@@ -60,8 +68,9 @@ class LocalUser {
 
     String markersJson = json.encode(markersList);
     await prefs.setString('saved_markers', markersJson);
-
   }
+
+
 
   // a method to load the user's streak data from local storage
   Future<void> loadData() async {
@@ -84,4 +93,5 @@ class LocalUser {
     }
 
   }
+
 }

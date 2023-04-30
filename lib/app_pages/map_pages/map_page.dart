@@ -44,7 +44,7 @@ class _MapPageState extends State<MapPage> {
     LatLng(59.31364085455251, 17.997910511698933),
     LatLng(59.31363187438705, 17.997699807602697),
   ];
-  
+
 
   List<Map<String, dynamic>>? parksData;
 
@@ -99,25 +99,78 @@ class _MapPageState extends State<MapPage> {
           draggable: true,
           icon: magentaIcon,
           onDragEnd: (LatLng newPosition) {
-            savedMarkers.removeWhere((marker) => marker.markerId == MarkerId(position.toString()));
-            savedMarkers.add(
-              Marker(
-                markerId: MarkerId(newPosition.toString()),
-                position: newPosition,
-                draggable: false, // Set draggable to false for dragged markers
-                icon: blueIcon, // Change color to indicate that the marker cannot be dragged anymore
-              ),
-            );
-            // Refresh the map to show the new marker color
-            LocalUser().saveData();
-            setState(() {});
+            setState(() {
+              savedMarkers = savedMarkers.map((marker) {
+                if (marker.markerId.value == position.toString()) {
+                  return marker.copyWith(
+                    positionParam: newPosition,
+                    draggableParam: false,
+                    iconParam: blueIcon,
+                  );
+                }
+                return marker;
+              }).toSet(); // Convert back to a Set
+              LocalUser().saveData();
+              setState(() {});
+            });
           },
+
+          infoWindow: InfoWindow(
+            title: position.toString(), // Set the new title for the marker
+            onTap: () {
+              // Show a dialog to allow the user to change the marker title
+              showDialog(
+                context: context,
+                builder: (context) {
+                  String newTitle = "";
+                  return AlertDialog(
+                    title: const Text("Change Marker Title"),
+                    content: TextField(
+                      onChanged: (value) {
+                        newTitle = value;
+                      },
+                      decoration: const InputDecoration(
+                        hintText: "Enter new title",
+                      ),
+                    ),
+                    actions: <Widget>[
+                      TextButton(
+                        child: const Text("Cancel"),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                      TextButton(
+                        child: const Text("Save"),
+                        onPressed: () {
+                          changeMarkerTitle(position, newTitle);
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                    ],
+                  );
+                },
+              );
+            },
+          ),
         ),
       );
     });
   }
 
-
+  void changeMarkerTitle(LatLng position, String newTitle) {
+    // Refresh the map to show the new marker color
+    setState(() {
+      savedMarkers = savedMarkers.map((marker) {
+        if (marker.markerId.value == position.toString()) {
+          return marker.copyWith(infoWindowParam: marker.infoWindow.copyWith(titleParam: newTitle), iconParam: blueIcon);
+        }
+        return marker;
+      }).toSet(); // Convert back to a Set
+      LocalUser().saveData();
+      setState(() {});
+    });
+  }
 
 
   @override
