@@ -1,3 +1,7 @@
+/ios/
+/macos/
+/linux/
+/windows/
 .dart_tool/package_config_subset
 .dart_tool/package_config.json
 .dart_tool/version
@@ -1806,6 +1810,4 @@ build/unit_test_assets/NOTICES.Z
 build/unit_test_assets/fonts/MaterialIcons-Regular.otf
 build/unit_test_assets/packages/cupertino_icons/assets/CupertinoIcons.ttf
 build/unit_test_assets/shaders/ink_sparkle.frag
-/ios/
-/macos/
-/linux/
+
