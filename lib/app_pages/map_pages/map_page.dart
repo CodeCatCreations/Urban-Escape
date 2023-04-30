@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'dart:convert';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:urban_escape_application/database/maria_sql.dart';
 
@@ -13,8 +11,11 @@ class MapPage extends StatefulWidget {
 
 class _MapPageState extends State<MapPage> {
 
+  final greenIcon = BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen);
+  final blueIcon = BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue);
+  final magentaIcon = BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure);
+
   late GoogleMapController mapController;
-  //List<LatLng> polygonPoints = [];
   bool showParks = false;
 
 
@@ -56,6 +57,7 @@ class _MapPageState extends State<MapPage> {
           final marker = Marker(
             markerId: MarkerId(row['name']),
             position: LatLng(row['latitude'], row['longitude']),
+            icon: greenIcon,
             infoWindow: InfoWindow(
               title: row['name'],
             ),
@@ -68,27 +70,6 @@ class _MapPageState extends State<MapPage> {
       print('Error: $error');
     }
   }
-/*
-    Future<void> fetchPolygonPoints() async {
-    try {
-      final String jsonString = await rootBundle.loadString('assets/polygon.json');
-      final json = jsonDecode(jsonString);
-      //final coordinates = json['features'][0]['geometry']['coordinates'][0];
-      final coordinatesList = json['features']
-        .sublist(0, 10) // display only the first 10 polygons
-        .map((feature) => feature['geometry']['coordinates'][0])
-        .toList();
-
-      // Convert the list of coordinates to LatLng objects
-      polygonPoints = coordinates.map((coord) {
-        return LatLng(coord[1], coord[0]);
-      }).toList();
-    } catch (error) {
-      // Handle the error here
-      print('Error: $error');
-    }
-  }
-  */
 
   @override
   void initState() {
@@ -100,38 +81,38 @@ class _MapPageState extends State<MapPage> {
   }
 
   void createSavedMarker(LatLng position) {
-    bool markerDragged = false;
     setState(() {
+      // Check if the marker with the given MarkerId already exists in savedMarkers
+      if (savedMarkers.contains(Marker(markerId: MarkerId('saved-${savedMarkers.length + 1}')))) {
+        return;
+      }
+
       savedMarkers.add(
         Marker(
           markerId: MarkerId('saved-${savedMarkers.length + 1}'),
           position: position,
-          draggable: true, // Set draggable to true for initially created markers
-          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
+          draggable: true,
+          icon: magentaIcon,
           onDragEnd: (LatLng newPosition) {
-
-            if (!markerDragged) {
-              setState(() {
-                markerDragged = true;
-              });
-            }
-
-            // When a marker is dragged to a new position, update the marker's position in the set
             savedMarkers.removeWhere((marker) => marker.markerId == MarkerId('saved-${savedMarkers.length + 1}'));
             savedMarkers.add(
               Marker(
                 markerId: MarkerId('saved-${savedMarkers.length + 1}'),
                 position: newPosition,
                 draggable: false, // Set draggable to false for dragged markers
-                icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueMagenta),
+                icon: blueIcon, // Change color to indicate that the marker cannot be dragged anymore
               ),
             );
-
+            // Refresh the map to show the new marker color
+            setState(() {});
           },
         ),
       );
     });
   }
+
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -175,10 +156,11 @@ class _MapPageState extends State<MapPage> {
             bottom: 85.0,
             left: 16.0,
             child: FloatingActionButton(
+
               onPressed: () async {
                 // Get the center coordinates of the map view
                 LatLng center = await mapController.getLatLng(
-                  const ScreenCoordinate(x: 500, y: 500)
+                  const ScreenCoordinate(x: 500, y: 500),
                 );
                 createSavedMarker(center);
               },
@@ -187,8 +169,7 @@ class _MapPageState extends State<MapPage> {
             ),
 
           ),
-        ],
-      ),
+      ]),
     );
   }
 }
