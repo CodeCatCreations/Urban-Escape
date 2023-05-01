@@ -73,16 +73,27 @@ class Achievement extends GestureDetector {
           );
   }
   void _showAchievementDetails(BuildContext context, String title, String description) {
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text(title),
-            content: Text(description),
-            actions: const <Widget>[
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(title),
+              GestureDetector(
+                onTap: () {
+                  Navigator.of(context).pop();
+                },
+                child: Icon(Icons.close),
+              ),
             ],
-          );
-        },
-      );
-    }
+          ),
+          content: Text(description),
+        );
+      },
+    );
+  }
+
+
 }
