@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+/*import 'package:flutter/material.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 
 class SocialPage extends StatefulWidget {
@@ -200,13 +200,6 @@ class _SocialPageState extends State<SocialPage> {
               _showAddPersonDialog(context);
             },
           ),
-          /*CupertinoButton(
-            onPressed: _userData != null ? _logout : _login,
-            child: Text(
-              _userData != null ? 'LOG OUT' : 'LOG IN',
-              style: const TextStyle(color: Colors.blue),
-            ),
-          ),*/
         ],
       ),
       body: SingleChildScrollView(
@@ -233,4 +226,112 @@ class Person {
   final String email;
 
   Person(this.name, this.email);
+}*/
+
+import 'dart:convert';
+import 'package:flutter/material.dart';
+import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
+import 'package:http/http.dart' as http;
+
+class SocialPage extends StatefulWidget {
+  const SocialPage({Key? key}) : super(key: key);
+
+  @override
+  _SocialPageState createState() => _SocialPageState();
 }
+
+class _SocialPageState extends State<SocialPage> {
+  Map<String, dynamic>? _userData;
+  AccessToken? _accessToken;
+  bool _isLoggedIn = false;
+  List<dynamic>? _friends;
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  _login() async {
+    final LoginResult result = await FacebookAuth.instance.login();
+
+    if (result.status == LoginStatus.success) {
+      _accessToken = result.accessToken;
+
+      final userData = await FacebookAuth.instance.getUserData();
+      _userData = userData;
+
+      final response = await http.get(Uri.parse(
+          'https://graph.facebook.com/v12.0/me/friends?fields=name,picture&limit=1000&access_token=${_accessToken!.token}'));
+
+      if (response.statusCode == 200) {
+        final json = jsonDecode(response.body);
+        setState(() {
+          _friends = json['data'];
+        });
+      } else {
+        print('Failed to get friends data');
+      }
+
+      setState(() {
+        _isLoggedIn = true;
+      });
+    } else {
+      print(result.status);
+      print(result.message);
+    }
+  }
+
+  _logout() async {
+    await FacebookAuth.instance.logOut();
+    _accessToken = null;
+    _userData = null;
+    _friends = null;
+
+    setState(() {
+      _isLoggedIn = false;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text(
+          'Social page',
+          style: TextStyle(
+            color: Colors.blue,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        centerTitle: true,
+        leading: TextButton(
+          onPressed: _isLoggedIn ? _logout : _login,
+          child: Text(
+            _isLoggedIn ? 'LOG OUT' : 'LOG IN',
+            style: const TextStyle(color: Colors.blue),
+          ),
+        ),
+      ),
+      body: _isLoggedIn
+          ? _friends == null
+          ? const Center(child: CircularProgressIndicator())
+          : ListView.builder(
+        itemCount: _friends!.length,
+        itemBuilder: (BuildContext context, int index) {
+          final friend = _friends![index];
+          final String name = friend['name'] ?? '';
+          final String pictureUrl = friend['picture']['data']['url'] ?? '';
+
+          return ListTile(
+            leading: CircleAvatar(backgroundImage: NetworkImage(pictureUrl)),
+            title: Text(name),
+          );
+        },
+      )
+          : const Center(child: Text('Please log in to see your friends')),
+    );
+  }
+}
+
