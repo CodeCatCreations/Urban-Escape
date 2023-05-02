@@ -21,6 +21,7 @@ class _MapPageState extends State<MapPage> {
 
  Set<Polygon> polygoneSet = HashSet<Polygon>();
  Set<Polygon> multipolygonSet = HashSet<Polygon>();
+  Set<Polygon> esboPolygonSet = HashSet<Polygon>();
 //List<LatLng> polygonPoints = [];
 
   //Fetch park data from MariaDB
@@ -93,6 +94,28 @@ class _MapPageState extends State<MapPage> {
     });
   }
 
+      Future<void> fetchEsbopolygons() async {
+    var mariaDB = MariaDB();
+    final multiPolygonData = await mariaDB.fetchEsboPolygons();
+    multiPolygonData.forEach((id, coordinates) {
+      final esboPolygonPoints = <LatLng>[];
+      for (final coordinate in coordinates) {
+        final latitude = coordinate['latitude'];
+        final longitude = coordinate['longitude'];
+        esboPolygonPoints.add(LatLng(latitude, longitude));
+      }
+      final polygon = Polygon(
+        polygonId: PolygonId(id.toString()),
+        points: esboPolygonPoints,
+        fillColor: Colors.transparent,
+        strokeColor: Colors.blue,
+        strokeWidth: 4,
+        geodesic: true,
+      );
+      esboPolygonSet.add(polygon);
+    });
+  }
+
   @override
   void initState() {
     super.initState();
@@ -101,6 +124,7 @@ class _MapPageState extends State<MapPage> {
     fetchParksData();
     fetchPolygonPoints();
     fetchMultipolygonPoints();
+    fetchEsbopolygons();
   }
 /*
   // Function to add a polygon dynamically
@@ -135,7 +159,7 @@ class _MapPageState extends State<MapPage> {
           mapController = controller;
         },
         markers: showParks ? markers : <Marker>{},
-        polygons: showPolygons ? multipolygonSet : <Polygon>{},
+        polygons: showPolygons ? esboPolygonSet : <Polygon>{},
       ),
       floatingActionButton: Row(
         mainAxisAlignment: MainAxisAlignment.start,

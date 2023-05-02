@@ -88,6 +88,30 @@ Future<Map<int, List<Map<String, dynamic>>>> fetchMultipolygons() async {
   return polygons;
 }
 
+Future<Map<int, List<Map<String, dynamic>>>> fetchEsboPolygons() async {
+  final conn = await getConnection();
+  final results = await conn.query('''
+    SELECT e.id, c.latitude, c.longitude
+    FROM esbopolygons e
+    INNER JOIN esbocoordinates c ON e.id = c.esbopolygon_id
+    ORDER BY e.id, c.id
+  ''');
+  await conn.close();
+  final esbopolygons = <int, List<Map<String, dynamic>>>{};
+  int currentId = 0; // initialize to a default value
+  for (final row in results) {
+    final id = row['id'] as int;
+    final latitude = row['latitude'] as double;
+    final longitude = row['longitude'] as double;
+    if (currentId != id) {
+      currentId = id;
+      esbopolygons[id] = [];
+    }
+    esbopolygons[id]?.add({'latitude': latitude, 'longitude': longitude});
+  }
+  return esbopolygons;
+}
+
 
 
 

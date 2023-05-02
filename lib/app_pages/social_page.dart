@@ -11,6 +11,7 @@ class SocialPage extends StatelessWidget {
   }
 }
 
+
 /*
 class SocialPage extends StatefulWidget {
   const SocialPage({Key? key}) : super(key: key);
@@ -246,3 +247,4 @@ class Person {
   Person(this.name, this.email);
 }
 */
+
