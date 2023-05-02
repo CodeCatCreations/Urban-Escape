@@ -15,6 +15,8 @@ class LocalUser {
 
 
   static final Set<Marker> savedMarkers = {};
+
+
   final blueIcon = BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue);
   final List<DateTime> _streakDates = []; // a list to store the dates of the user's streaks
 
