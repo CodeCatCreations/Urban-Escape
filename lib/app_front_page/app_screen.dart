@@ -5,8 +5,8 @@ import '../app_pages/progress_page/goal_storage.dart';
 import '../app_pages/progress_page/progress_page.dart';
 import '../app_pages/social_page.dart';
 import '../app_pages/sounds_page.dart';
-import '../app_pages/map_page.dart';
-import '../app_pages/daily_banner_page.dart';
+import '../app_pages/map_pages/map_page.dart';
+import '../app_pages/progress_page/daily_banner_page.dart';
 
 //Creating a stateful widget called AppScreen
 class AppScreen extends StatefulWidget {
