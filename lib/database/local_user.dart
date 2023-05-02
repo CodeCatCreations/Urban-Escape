@@ -18,7 +18,6 @@ class LocalUser {
   final blueIcon = BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue);
   final List<DateTime> _streakDates = []; // a list to store the dates of the user's streaks
 
-
   // a method to add a date to the user's streak
   void addStreakDate(DateTime date) {
     _streakDates.add(date);
@@ -33,23 +32,19 @@ class LocalUser {
     return streak;
   }
 
-  Future<bool> goalAdded() async {
+  bool goalAdded() {
     GoalStorage goalStorage = GoalStorage();
-    if (await goalStorage.readGoal() == 0){
-      return false;
-    }
-    return true;
+    Future<int> storedGoal = goalStorage.readGoal();
+    storedGoal.then((value) => print('Stored goal: $value'));
+    return storedGoal != 0;
   }
-
 
 
   // a method to save the user's streak data to local storage
   Future <void> saveData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-
     saveDates(prefs);
     saveMarkers(prefs);
-
   }
 
   void saveDates(SharedPreferences prefs) async {

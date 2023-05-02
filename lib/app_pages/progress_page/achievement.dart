@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 
 class Achievement extends GestureDetector {
   final String title;
-  final double percent = 0.8;
+  double percent = 0.8;
   final String description;
   final int maxLevel;
   int level = 0;
@@ -17,6 +17,15 @@ class Achievement extends GestureDetector {
     required this.maxLevel,
     required this.icon,
   }) : super(key: key);
+
+
+  void incrementLevel() async {
+    if (level < maxLevel) {
+      level++;
+      percent = 0;
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
