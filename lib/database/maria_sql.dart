@@ -41,12 +41,12 @@ class MariaDB {
   }
 
 
-Future<Map<int, List<Map<String, dynamic>>>> fetchPolygons() async {
+Future<Map<int, List<Map<String, dynamic>>>> fetchHighNoisePollutionPolygons() async {
   final conn = await getConnection();
   final results = await conn.query('''
     SELECT p.id, c.latitude, c.longitude
-    FROM polygons p
-    INNER JOIN coordinates c ON p.id = c.polygon_id
+    FROM high_pollution_polygons p
+    INNER JOIN high_pollution_coordinates c ON p.id = c.polygon_id
     ORDER BY p.id, c.id
   ''');
   await conn.close();
@@ -65,12 +65,12 @@ Future<Map<int, List<Map<String, dynamic>>>> fetchPolygons() async {
   return polygons;
 }
 
-Future<Map<int, List<Map<String, dynamic>>>> fetchMultipolygons() async {
+Future<Map<int, List<Map<String, dynamic>>>> fetchLowNoisePollutionPolygons() async {
   final conn = await getConnection();
   final results = await conn.query('''
     SELECT p.id, c.latitude, c.longitude
-    FROM multipolygons p
-    INNER JOIN multicoordinates c ON p.id = c.polygon_id
+    FROM low_pollution_polygons p
+    INNER JOIN low_pollution_coordinates c ON p.id = c.low_polygon_id
     ORDER BY p.id, c.id
   ''');
   await conn.close();
@@ -112,6 +112,31 @@ Future<Map<int, List<Map<String, dynamic>>>> fetchEsboPolygons() async {
   }
   return esbopolygons;
 }
+
+Future<Map<int, List<Map<String, dynamic>>>> fetchBiotopPolygons() async {
+  final conn = await getConnection();
+  final results = await conn.query('''
+    SELECT b.id, c.latitude, c.longitude
+    FROM biotoppolygons b
+    INNER JOIN biotopcoordinates c ON b.id = c.biotoppolygon_id
+    ORDER BY b.id, c.id
+  ''');
+  await conn.close();
+  final biotoppolygons = <int, List<Map<String, dynamic>>>{};
+  int currentId = 0; // initialize to a default value
+  for (final row in results) {
+    final id = row['id'] as int;
+    final latitude = row['latitude'] as double;
+    final longitude = row['longitude'] as double;
+    if (currentId != id) {
+      currentId = id;
+      biotoppolygons[id] = [];
+    }
+    biotoppolygons[id]?.add({'latitude': latitude, 'longitude': longitude});
+  }
+  return biotoppolygons;
+}
+
 
 
 

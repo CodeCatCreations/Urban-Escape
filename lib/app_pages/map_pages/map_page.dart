@@ -26,10 +26,10 @@ class _MapPageState extends State<MapPage> {
 
   final Set<Marker> parkMarkers = {};
   Set<Marker> savedMarkers = LocalUser.savedMarkers;
-  Set<Polygon> polygoneSet = HashSet<Polygon>();
-  Set<Polygon> multipolygonSet = HashSet<Polygon>();
+  Set<Polygon> highNoisePollutionPolygonSet = HashSet<Polygon>();
+  Set<Polygon> lowNoisePollutionPolygonSet = HashSet<Polygon>();
   Set<Polygon> esboPolygonSet = HashSet<Polygon>();
-
+  Set<Polygon> biotoppolygonsSet= HashSet<Polygon>();
   List<Map<String, dynamic>>? parksData;
 
   //Fetch park data from MariaDB
@@ -57,9 +57,9 @@ class _MapPageState extends State<MapPage> {
     }
   }
 
-    Future<void> fetchPolygonPoints() async {
+    Future<void> fetchLowNoisePollutionPolygonPoints() async {
     var mariaDB = MariaDB();
-    final polygonData = await mariaDB.fetchPolygons();
+    final polygonData = await mariaDB.fetchLowNoisePollutionPolygons();
     polygonData.forEach((id, coordinates) {
       final polygonPoints = <LatLng>[];
       for (final coordinate in coordinates) {
@@ -75,15 +75,14 @@ class _MapPageState extends State<MapPage> {
         strokeWidth: 4,
         geodesic: true,
       );
-      polygoneSet.add(polygon);
+      lowNoisePollutionPolygonSet.add(polygon);
     });
   }
-  
 
-    Future<void> fetchMultipolygonPoints() async {
+      Future<void> fetchHighNoisePollutionPolygonPoints() async {
     var mariaDB = MariaDB();
-    final multiPolygonData = await mariaDB.fetchMultipolygons();
-    multiPolygonData.forEach((id, coordinates) {
+    final polygonData = await mariaDB.fetchHighNoisePollutionPolygons();
+    polygonData.forEach((id, coordinates) {
       final polygonPoints = <LatLng>[];
       for (final coordinate in coordinates) {
         final latitude = coordinate['latitude'];
@@ -98,9 +97,10 @@ class _MapPageState extends State<MapPage> {
         strokeWidth: 4,
         geodesic: true,
       );
-      multipolygonSet.add(polygon);
+      highNoisePollutionPolygonSet.add(polygon);
     });
   }
+
 
       Future<void> fetchEsbopolygons() async {
     var mariaDB = MariaDB();
@@ -124,6 +124,28 @@ class _MapPageState extends State<MapPage> {
     });
   }
 
+  Future<void> fetchBiotopPolygons() async {
+    var mariaDB = MariaDB();
+    final multiPolygonData = await mariaDB.fetchBiotopPolygons();
+    multiPolygonData.forEach((id, coordinates) {
+      final biotopPolygonPoints = <LatLng>[];
+      for (final coordinate in coordinates) {
+        final latitude = coordinate['latitude'];
+        final longitude = coordinate['longitude'];
+        biotopPolygonPoints.add(LatLng(latitude, longitude));
+      }
+      final polygon = Polygon(
+        polygonId: PolygonId(id.toString()),
+        points: biotopPolygonPoints,
+        fillColor: Colors.transparent,
+        strokeColor: Colors.orange,
+        strokeWidth: 4,
+        geodesic: true,
+      );
+      biotoppolygonsSet.add(polygon);
+    });
+  }
+
   @override
   void initState() {
     super.initState();
@@ -132,9 +154,8 @@ class _MapPageState extends State<MapPage> {
     savedMarkers = LocalUser.savedMarkers;
     //Call fetchParksData() when our widget is created
     fetchParksData();
-    fetchPolygonPoints();
-    fetchMultipolygonPoints();
-    fetchEsbopolygons();
+    fetchLowNoisePollutionPolygonPoints();
+    fetchHighNoisePollutionPolygonPoints();
   }
 
   void createSavedMarker(LatLng position) {
@@ -233,15 +254,16 @@ class _MapPageState extends State<MapPage> {
     return Scaffold(
       body: GoogleMap(
         initialCameraPosition: const CameraPosition(
-          target: LatLng(59.31363187438705, 17.997699807602697),
-          zoom: 20,
+          target: LatLng(59.3293, 18.0686),
+          zoom: 12,
         ),
         onMapCreated: (controller) {
           mapController = controller;
         },
         markers: showParks ? allMarkers : savedMarkers,
-        polygons: showPolygons ? esboPolygonSet : <Polygon> {},
+        polygons: showPolygons ? highNoisePollutionPolygonSet : <Polygon> {},
       ),
+
       floatingActionButton: Stack(children: [
         Positioned(
           bottom: 16.0,
