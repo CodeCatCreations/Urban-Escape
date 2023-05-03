@@ -15,37 +15,37 @@ class SoundsPage extends StatelessWidget {
             imageFilePath: 'assets/icons/rainy.png',
             activatedColor: Colors.green,
             deactivatedColor: Colors.grey,
-            soundFilePath: UrlSource('https://bigsoundbank.com/UPLOAD/mp3/1019.mp3'), // Birds
+            soundFileSource: UrlSource('https://bigsoundbank.com/UPLOAD/mp3/1019.mp3'), // Rain
           ),
           SoundWidget(
             imageFilePath: 'assets/icons/thunder.png',
             activatedColor: Colors.green,
             deactivatedColor: Colors.grey,
-            soundFilePath: UrlSource('https://bigsoundbank.com/UPLOAD/mp3/2718.mp3'), // Rain
+            soundFileSource: UrlSource('https://bigsoundbank.com/UPLOAD/mp3/2718.mp3'), // Thunder
           ),
           SoundWidget(
             imageFilePath: 'assets/icons/wind.png',
             activatedColor: Colors.green,
             deactivatedColor: Colors.grey,
-            soundFilePath: UrlSource('https://bigsoundbank.com/UPLOAD/mp3/0908.mp3'), // Waves and birds
+            soundFileSource: UrlSource('https://bigsoundbank.com/UPLOAD/mp3/0908.mp3'), // Wind
           ),
           SoundWidget(
             imageFilePath: 'assets/icons/wave.png',
             activatedColor: Colors.green,
             deactivatedColor: Colors.grey,
-            soundFilePath: UrlSource('https://bigsoundbank.com/UPLOAD/mp3/0265.mp3'), // Wind in tall grass
+            soundFileSource: UrlSource('https://bigsoundbank.com/UPLOAD/mp3/0265.mp3'), // Waves
           ),
           SoundWidget(
             imageFilePath: 'assets/icons/bird.png',
             activatedColor: Colors.green,
             deactivatedColor: Colors.grey,
-            soundFilePath: UrlSource('https://bigsoundbank.com/UPLOAD/mp3/0100.mp3'), // Forest
+            soundFileSource: UrlSource('https://bigsoundbank.com/UPLOAD/mp3/0100.mp3'), // Birds
           ),
           SoundWidget(
             imageFilePath: 'assets/icons/campfire.png',
             activatedColor: Colors.green,
             deactivatedColor: Colors.grey,
-            soundFilePath: UrlSource('https://bigsoundbank.com/UPLOAD/mp3/0989.mp3'), // Fire
+            soundFileSource: UrlSource('https://bigsoundbank.com/UPLOAD/mp3/0989.mp3'), // Campfire
           ),
         ],
       ),
@@ -57,14 +57,14 @@ class SoundWidget extends StatefulWidget {
   final String imageFilePath;
   final Color activatedColor;
   final Color deactivatedColor;
-  final Source soundFilePath;
+  final Source soundFileSource;
 
   const SoundWidget({
     Key? key,
     required this.imageFilePath,
     required this.activatedColor,
     required this.deactivatedColor,
-    required this.soundFilePath,
+    required this.soundFileSource,
   }) : super(key: key);
 
   @override
@@ -121,7 +121,7 @@ class _SoundWidgetState extends State<SoundWidget> {
 
   void _playSound() async {
     _audioPlayer.setReleaseMode(ReleaseMode.loop);
-    await _audioPlayer.play(widget.soundFilePath);
+    await _audioPlayer.play(widget.soundFileSource);
   }
 
 
