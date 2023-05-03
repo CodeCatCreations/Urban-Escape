@@ -23,6 +23,7 @@ class _MapPageState extends State<MapPage> {
   late GoogleMapController mapController;
   bool showParks = false;
   bool showPolygons = false;
+  bool showFilters = false;
 
   final Set<Marker> parkMarkers = {};
   Set<Marker> savedMarkers = LocalUser.savedMarkers;
@@ -247,6 +248,148 @@ class _MapPageState extends State<MapPage> {
     });
   }
 
+
+  @override
+  Widget build(BuildContext context) {
+    final Set<Marker> allMarkers = {...parkMarkers, ...savedMarkers};
+
+    return Scaffold(
+      body: GoogleMap(
+        initialCameraPosition: const CameraPosition(
+          target: LatLng(59.3293, 18.0686),
+          zoom: 12,
+        ),
+        onMapCreated: (controller) {
+          mapController = controller;
+        },
+        markers: showParks ? allMarkers : savedMarkers,
+        polygons: showPolygons ? highNoisePollutionPolygonSet : <Polygon>{},
+      ),
+      floatingActionButton: Stack(
+        children: [
+          Positioned(
+            bottom: 16.0,
+            left: 85.0,
+            child: FloatingActionButton(
+              onPressed: () async {
+                // Get the center coordinates of the map view
+                LatLng center = await mapController.getLatLng(
+                  const ScreenCoordinate(x: 500, y: 500),
+                );
+                createSavedMarker(center);
+              },
+              child: const Icon(Icons.add),
+            ),
+          ),
+          Positioned(
+            bottom: 16.0,
+            left: 20.0,
+            child: FloatingActionButton(
+              onPressed: () {
+                setState(() {
+                  showFilters = !showFilters;
+                });
+              },
+              backgroundColor: Colors.black54,
+              child: const Icon(Icons.filter_list, color: Colors.white), // set the background color
+            ),
+          ),
+          if (showFilters)
+            Positioned(
+              bottom: 100.0,
+              left: 20.0,
+              child: Column(
+                children: [
+                  FloatingActionButton(
+                    onPressed: () {
+                      setState(() {
+                        showParks = !showParks;
+                      });
+                    },
+                    child: Icon(showParks ? Icons.visibility : Icons.visibility_off),
+                  ),
+                  const SizedBox(height: 16),
+                  FloatingActionButton(
+                    onPressed: () {
+                      setState(() {
+                        showPolygons = !showPolygons;
+                      });
+                    },
+                    tooltip: 'Toggle Polygons',
+                    child: Icon(showPolygons ? Icons.visibility : Icons.visibility_off),
+                  ),
+                ],
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+
+/*
+  @override
+  Widget build(BuildContext context) {
+    final Set<Marker> allMarkers = {...parkMarkers, ...savedMarkers};
+
+    return Scaffold(
+      body: GoogleMap(
+        initialCameraPosition: const CameraPosition(
+          target: LatLng(59.3293, 18.0686),
+          zoom: 12,
+        ),
+        onMapCreated: (controller) {
+          mapController = controller;
+        },
+        markers: showParks ? allMarkers : savedMarkers,
+        polygons: showPolygons ? highNoisePollutionPolygonSet : <Polygon> {},
+      ),
+
+      floatingActionButton: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          FloatingActionButton(
+            onPressed: () {
+              setState(() {
+                showFilters = !showFilters;
+              });
+            },
+            backgroundColor: Colors.black54,
+            child: const Icon(Icons.filter_list, color: Colors.white), // set the background color
+          ),
+          if (showFilters)
+            Column(
+              children: [
+                FloatingActionButton(
+                  onPressed: () {
+                    setState(() {
+                      showParks = !showParks;
+                    });
+                  },
+                  child: Icon(showParks ? Icons.visibility : Icons.visibility_off),
+                ),
+                const SizedBox(height: 16),
+                FloatingActionButton(
+                  onPressed: () {
+                    setState(() {
+                      showPolygons = !showPolygons;
+                    });
+                  },
+                  tooltip: 'Toggle Polygons',
+                  child: Icon(showPolygons ? Icons.visibility : Icons.visibility_off),
+                ),
+              ],
+            ),
+        ],
+      ),
+    );
+  }
+
+   */
+
+
+
+  /*
   @override
   Widget build(BuildContext context) {
     final Set<Marker> allMarkers = {...parkMarkers, ...savedMarkers};
@@ -307,4 +450,6 @@ class _MapPageState extends State<MapPage> {
       ]),
     );
   }
+
+   */
 }
