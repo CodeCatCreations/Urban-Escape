@@ -89,7 +89,7 @@ Future<Map<int, List<Map<String, dynamic>>>> fetchLowNoisePollutionPolygons() as
   return polygons;
 }
 
-Future<Map<int, List<Map<String, dynamic>>>> fetchEsboPolygons() async {
+Future<Map<int, List<Map<String, dynamic>>>> fetchEcoSignificantAreasPolygons() async {
   final conn = await getConnection();
   final results = await conn.query('''
     SELECT e.id, c.latitude, c.longitude

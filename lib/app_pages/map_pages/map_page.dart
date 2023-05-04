@@ -22,15 +22,17 @@ class _MapPageState extends State<MapPage> {
 
   late GoogleMapController mapController;
   bool showParks = false;
-  bool showPolygons = false;
+  bool showHighNoisePollutionPolygons = false;
+  bool showLowPollutionPolygons = false;
+  bool showEcoSignificantAreasPolygons = false;
   bool showFilters = false;
 
   final Set<Marker> parkMarkers = {};
   Set<Marker> savedMarkers = LocalUser.savedMarkers;
   Set<Polygon> highNoisePollutionPolygonSet = HashSet<Polygon>();
   Set<Polygon> lowNoisePollutionPolygonSet = HashSet<Polygon>();
-  Set<Polygon> esboPolygonSet = HashSet<Polygon>();
-  Set<Polygon> biotoppolygonsSet= HashSet<Polygon>();
+  Set<Polygon> ecoSignificantAreasPolygonSet = HashSet<Polygon>();
+  Set<Polygon> biotoppolygonsSet = HashSet<Polygon>();
   List<Map<String, dynamic>>? parksData;
 
   //Fetch park data from MariaDB
@@ -58,7 +60,7 @@ class _MapPageState extends State<MapPage> {
     }
   }
 
-    Future<void> fetchLowNoisePollutionPolygonPoints() async {
+  Future<void> fetchLowNoisePollutionPolygonPoints() async {
     var mariaDB = MariaDB();
     final polygonData = await mariaDB.fetchLowNoisePollutionPolygons();
     polygonData.forEach((id, coordinates) {
@@ -80,7 +82,7 @@ class _MapPageState extends State<MapPage> {
     });
   }
 
-      Future<void> fetchHighNoisePollutionPolygonPoints() async {
+  Future<void> fetchHighNoisePollutionPolygonPoints() async {
     var mariaDB = MariaDB();
     final polygonData = await mariaDB.fetchHighNoisePollutionPolygons();
     polygonData.forEach((id, coordinates) {
@@ -102,48 +104,25 @@ class _MapPageState extends State<MapPage> {
     });
   }
 
-
-      Future<void> fetchEsbopolygons() async {
+  Future<void> fetchEcoSignificantAreasPolygons() async {
     var mariaDB = MariaDB();
-    final multiPolygonData = await mariaDB.fetchEsboPolygons();
+    final multiPolygonData = await mariaDB.fetchEcoSignificantAreasPolygons();
     multiPolygonData.forEach((id, coordinates) {
-      final esboPolygonPoints = <LatLng>[];
+      final ecoSignificantAreasPolygonPoints = <LatLng>[];
       for (final coordinate in coordinates) {
         final latitude = coordinate['latitude'];
         final longitude = coordinate['longitude'];
-        esboPolygonPoints.add(LatLng(latitude, longitude));
+        ecoSignificantAreasPolygonPoints.add(LatLng(latitude, longitude));
       }
       final polygon = Polygon(
         polygonId: PolygonId(id.toString()),
-        points: esboPolygonPoints,
+        points: ecoSignificantAreasPolygonPoints,
         fillColor: Colors.transparent,
         strokeColor: Colors.blue,
         strokeWidth: 4,
         geodesic: true,
       );
-      esboPolygonSet.add(polygon);
-    });
-  }
-
-  Future<void> fetchBiotopPolygons() async {
-    var mariaDB = MariaDB();
-    final multiPolygonData = await mariaDB.fetchBiotopPolygons();
-    multiPolygonData.forEach((id, coordinates) {
-      final biotopPolygonPoints = <LatLng>[];
-      for (final coordinate in coordinates) {
-        final latitude = coordinate['latitude'];
-        final longitude = coordinate['longitude'];
-        biotopPolygonPoints.add(LatLng(latitude, longitude));
-      }
-      final polygon = Polygon(
-        polygonId: PolygonId(id.toString()),
-        points: biotopPolygonPoints,
-        fillColor: Colors.transparent,
-        strokeColor: Colors.orange,
-        strokeWidth: 4,
-        geodesic: true,
-      );
-      biotoppolygonsSet.add(polygon);
+      ecoSignificantAreasPolygonSet.add(polygon);
     });
   }
 
@@ -155,6 +134,7 @@ class _MapPageState extends State<MapPage> {
     savedMarkers = LocalUser.savedMarkers;
     //Call fetchParksData() when our widget is created
     fetchParksData();
+    fetchEcoSignificantAreasPolygons();
     fetchLowNoisePollutionPolygonPoints();
     fetchHighNoisePollutionPolygonPoints();
   }
@@ -248,8 +228,115 @@ class _MapPageState extends State<MapPage> {
     });
   }
 
-
   @override
+  Widget build(BuildContext context) {
+    final Set<Marker> allMarkers = {...parkMarkers, ...savedMarkers};
+
+    return Scaffold(
+      body: GoogleMap(
+        initialCameraPosition: const CameraPosition(
+          target: LatLng(59.3293, 18.0686),
+          zoom: 12,
+        ),
+        onMapCreated: (controller) {
+          mapController = controller;
+        },
+        markers: showParks ? allMarkers : savedMarkers,
+        polygons: {
+          if (showHighNoisePollutionPolygons) ...highNoisePollutionPolygonSet,
+          if (showLowPollutionPolygons) ...lowNoisePollutionPolygonSet,
+          if (showEcoSignificantAreasPolygons) ...ecoSignificantAreasPolygonSet,
+        },
+      ),
+      floatingActionButton: Stack(
+        children: [
+          Positioned(
+            bottom: 16.0,
+            left: 85.0,
+            child: ElevatedButton(
+              onPressed: () async {
+                // Get the center coordinates of the map view
+                LatLng center = await mapController.getLatLng(
+                  const ScreenCoordinate(x: 500, y: 500),
+                );
+                createSavedMarker(center);
+              },
+              child: const Text('Add Marker'),
+            ),
+          ),
+          Positioned(
+            bottom: 16.0,
+            left: 20.0,
+            child: FloatingActionButton(
+              onPressed: () {
+                setState(() {
+                  showFilters = !showFilters;
+                });
+              },
+              backgroundColor: Colors.black54,
+              child: const Icon(Icons.filter_list, color: Colors.white),
+            ),
+          ),
+          if (showFilters)
+            Positioned(
+              bottom: 100.0,
+              left: 20.0,
+              child: Column(
+                children: [
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        showParks = !showParks;
+                      });
+                    },
+                    child: Text(showParks ? 'Hide Parks' : 'Show Parks'),
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        showHighNoisePollutionPolygons =
+                            !showHighNoisePollutionPolygons;
+                      });
+                    },
+                    child: Text(showHighNoisePollutionPolygons
+                        ? 'Hide High Noise Pollution'
+                        : 'Show High Noise Pollution'),
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        showLowPollutionPolygons = !showLowPollutionPolygons;
+                      });
+                    },
+                    child: Text(showLowPollutionPolygons
+                        ? 'Hide Low Noise Pollution'
+                        : 'Show Low Noise Pollution'),
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        showEcoSignificantAreasPolygons =
+                            !showEcoSignificantAreasPolygons;
+                      });
+                    },
+                    child: Text(showEcoSignificantAreasPolygons
+                        ? 'Hide Eco Significant Areas'
+                        : 'Show Eco Significant Areas'),
+                  ),
+                ],
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  /*
+    @override
   Widget build(BuildContext context) {
     final Set<Marker> allMarkers = {...parkMarkers, ...savedMarkers};
 
@@ -325,7 +412,7 @@ class _MapPageState extends State<MapPage> {
       ),
     );
   }
-
+  */
 
 /*
   @override
@@ -386,8 +473,6 @@ class _MapPageState extends State<MapPage> {
   }
 
    */
-
-
 
   /*
   @override
