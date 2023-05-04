@@ -10,9 +10,9 @@ class LocalUser {
   factory LocalUser() {
     return _singleton;
   }
+
   bool hasPinned = false;
   LocalUser._internal();
-
   static final Set<Marker> savedMarkers = {};
   List<Map<String, dynamic>> markersList = savedMarkers.map((marker) {
     return {
@@ -30,9 +30,11 @@ class LocalUser {
   List<Map<String, dynamic>> getMarkersList(){
     return markersList;
   }
+
   void addStreakDate(DateTime date) {
     _streakDates.add(date);
   }
+
   // a method to get the user's current streak
   int getCurrentStreak() {
     int streak = 0;
@@ -45,7 +47,11 @@ class LocalUser {
 
   void setGoal(){
     hasGoal = true;
+    SharedPreferences.getInstance().then((prefs) {
+      prefs.setBool('has_goal', hasGoal);
+    });
   }
+
   bool goalAdded() {
     /*GoalStorage goalStorage = GoalStorage();
     Future<int> storedGoal = goalStorage.readGoal();
@@ -55,18 +61,19 @@ class LocalUser {
   return hasGoal;
   }
 
-
-
   // a method to save the user's streak data to local storage
   Future <void> saveData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     saveDates(prefs);
     saveMarkers(prefs);
     hasPinned = true;
+    prefs.setBool('has_goal', hasGoal);
   }
+
   bool getPinStatus(){
     return hasPinned;
   }
+
   void saveDates(SharedPreferences prefs) async {
     List<String> dates = _streakDates.map((date) => date.toIso8601String()).toList();
     await prefs.setStringList('streak_dates', dates);
@@ -84,10 +91,10 @@ class LocalUser {
     String markersJson = json.encode(markersList);
     await prefs.setString('saved_markers', markersJson);
   }
+
   List<Map<String, dynamic>> getMarkerList(){
     return markersList;
   }
-
 
   // a method to load the user's streak data from local storage
   Future<void> loadData() async {
@@ -108,6 +115,7 @@ class LocalUser {
       );
       savedMarkers.add(marker);
     }
+    hasGoal = prefs.getBool('has_goal') ?? false;
 
   }
 

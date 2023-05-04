@@ -12,6 +12,7 @@ class UrbanEscape extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final user = LocalUser();
+    user.loadData();
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Urban Escape',
