@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:neon_circular_timer/neon_circular_timer.dart' as timer;
+import 'package:percent_indicator/percent_indicator.dart';
+import 'dart:async';
 
 class SocialPage extends StatefulWidget {
   const SocialPage({super.key});
@@ -9,66 +10,77 @@ class SocialPage extends StatefulWidget {
 }
 
 class _SocialPageState extends State<SocialPage> {
-  final timer.CountDownController controller =  timer.CountDownController();
-    
+  int _passedTime = 0;
+  double _percent = 0.0;
+  double goal = 20.0;
+  Timer _timer = Timer(Duration.zero, () {});
+
+  void startTimer() {
+    if (_timer.isActive) return;
+    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+      setState(() {
+        _passedTime++;
+        _percent = Duration(seconds: _passedTime).inSeconds.toDouble() > goal ? 1 : Duration(seconds: _passedTime).inSeconds.toDouble() / goal;
+      });
+    });
+  }
+
+  void stopTimer() {
+    _timer.cancel();
+  }
+
+  void resetTimer() {
+    setState(() {
+      _passedTime = 0;
+      _percent = 0;
+    });
+  }
+
+  String get timerText {
+    Duration duration = Duration(seconds: _passedTime);
+    return "${duration.inMinutes.remainder(60).toString().padLeft(2, '0')}:${(duration.inSeconds.remainder(60)).toString().padLeft(2, '0')}";
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        backgroundColor: Colors.grey.shade200,
-        body: Padding(
-          padding: const EdgeInsets.only(top: 50),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              timer.NeonCircularTimer(
-                  onComplete: () {
-                    controller.restart();
-                  },
-                  width: 200,
-                  controller: controller,
-                  duration: 10, //Connect it with the LocalUser saved data "Daily goal"
-                  strokeWidth: 10,
-                  isTimerTextShown: true,
-                  neumorphicEffect: true,
-                  outerStrokeColor: Colors.grey.shade100,
-                  innerFillGradient: LinearGradient(colors: [
-                    Colors.greenAccent.shade200,
-                    Colors.blueAccent.shade400
-                  ]),
-                  neonGradient: LinearGradient(colors: [
-                    Colors.greenAccent.shade200,
-                    Colors.blueAccent.shade400
-                  ]),
-                  strokeCap: StrokeCap.round,
-                  innerFillColor: Colors.black12,
-                  backgroudColor: Colors.grey.shade100,
-                  neonColor: Colors.blue.shade900),
-              Padding(
-                padding: const EdgeInsets.all(40),
-                child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      IconButton(
-                          icon: const Icon(Icons.play_arrow),
-                          onPressed: () {
-                            controller.resume();
-                          }),
-                      IconButton(
-                          icon: const Icon(Icons.pause),
-                          onPressed: () {
-                            //PauseFile
-                            controller.pause();
-                          }),
-                      IconButton(
-                          icon: const Icon(Icons.repeat),
-                          onPressed: () {
-                            controller.restart();
-                          }),
-                    ]),
-              )
-            ],
+
+    return Column(
+      children: <Widget>[
+        Padding(
+          padding: const EdgeInsets.only(top: 85.0),
+          child: CircularPercentIndicator(
+            radius: 80,
+            lineWidth: 10.0,
+            animation: true,
+            animationDuration: 1000,
+            animateFromLastPercent: true,
+            percent: _percent,
+            center: Text(timerText, textScaleFactor: 1.6),
+            progressColor: Colors.blue,
           ),
-        ));
+        ),
+        SizedBox(height: 20),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            ElevatedButton(
+              child: Text('Start'),
+              onPressed: startTimer,
+            ),
+            SizedBox(width: 20),
+            ElevatedButton(
+              child: Text('Stop'),
+              onPressed: stopTimer,
+            ),
+            SizedBox(width: 20),
+            ElevatedButton(
+              child: Text('Reset'),
+              onPressed: resetTimer,
+            ),
+          ],
+        )
+      ],
+    );
   }
 }
 
