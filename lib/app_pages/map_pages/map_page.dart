@@ -218,13 +218,13 @@ class _MapPageState extends State<MapPage> {
     });
   }
 
+
   void changeMarkerTitle(LatLng position, String newTitle) {
     // Refresh the map to show the new marker color
     setState(() {
       savedMarkers = savedMarkers.map((marker) {
         if (marker.markerId.value == position.toString()) {
           return marker.copyWith(
-            positionParam: position,
             draggableParam: false,
             iconParam: blueIcon,
             infoWindowParam: marker.infoWindow.copyWith(titleParam: newTitle),
@@ -232,11 +232,13 @@ class _MapPageState extends State<MapPage> {
         }
         return marker;
       }).toSet(); // Convert back to a Set
+
       addMarkerPressed = false;
       LocalUser().saveData();
       setState(() {});
     });
   }
+
 
   @override
   Widget build(BuildContext context) {
