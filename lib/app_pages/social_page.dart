@@ -1,3 +1,93 @@
+import 'package:flutter/material.dart';
+import 'package:neon_circular_timer/neon_circular_timer.dart' as timer;
+
+class SocialPage extends StatefulWidget {
+  const SocialPage({super.key});
+
+  @override
+  State<SocialPage> createState() => _SocialPageState();
+}
+
+class _SocialPageState extends State<SocialPage> {
+  final timer.CountDownController controller =  timer.CountDownController();
+    
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        backgroundColor: Colors.grey.shade200,
+        body: Padding(
+          padding: const EdgeInsets.only(top: 50),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              timer.NeonCircularTimer(
+                  onComplete: () {
+                    controller.restart();
+                  },
+                  width: 200,
+                  controller: controller,
+                  duration: 10, //Connect it with the LocalUser saved data "Daily goal"
+                  strokeWidth: 10,
+                  isTimerTextShown: true,
+                  neumorphicEffect: true,
+                  outerStrokeColor: Colors.grey.shade100,
+                  innerFillGradient: LinearGradient(colors: [
+                    Colors.greenAccent.shade200,
+                    Colors.blueAccent.shade400
+                  ]),
+                  neonGradient: LinearGradient(colors: [
+                    Colors.greenAccent.shade200,
+                    Colors.blueAccent.shade400
+                  ]),
+                  strokeCap: StrokeCap.round,
+                  innerFillColor: Colors.black12,
+                  backgroudColor: Colors.grey.shade100,
+                  neonColor: Colors.blue.shade900),
+              Padding(
+                padding: const EdgeInsets.all(40),
+                child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      IconButton(
+                          icon: const Icon(Icons.play_arrow),
+                          onPressed: () {
+                            controller.resume();
+                          }),
+                      IconButton(
+                          icon: const Icon(Icons.pause),
+                          onPressed: () {
+                            //PauseFile
+                            controller.pause();
+                          }),
+                      IconButton(
+                          icon: const Icon(Icons.repeat),
+                          onPressed: () {
+                            controller.restart();
+                          }),
+                    ]),
+              )
+            ],
+          ),
+        ));
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /*import 'package:flutter/material.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 
@@ -227,7 +317,7 @@ class Person {
 
   Person(this.name, this.email);
 }*/
-
+/*
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
@@ -334,4 +424,5 @@ class _SocialPageState extends State<SocialPage> {
     );
   }
 }
+*/
 

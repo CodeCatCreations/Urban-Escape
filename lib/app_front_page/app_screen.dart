@@ -26,7 +26,7 @@ class _AppScreenState extends State<AppScreen> {
     ProgressPage(storage: GoalStorage()),
     const MapPage(),
     const SoundsPage(),
-    const SocialPage(),
+    SocialPage(),
     const AppCenterPage(),
   ];
 
