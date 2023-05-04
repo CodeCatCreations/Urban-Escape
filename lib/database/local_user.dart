@@ -65,6 +65,7 @@ class LocalUser {
         'markerId': marker.markerId.value,
         'latitude': marker.position.latitude,
         'longitude': marker.position.longitude,
+        'infoWindowTitle' : marker.infoWindow.title
       };
     }).toList();
 
@@ -73,14 +74,20 @@ class LocalUser {
   }
 
 
-
   // a method to load the user's streak data from local storage
   Future<void> loadData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
+    loadDates(prefs);
+    loadMarkers(prefs);
+  }
+
+  void loadDates(SharedPreferences prefs) {
     List<String> dates = prefs.getStringList('streak_dates') ?? [];
     _streakDates.clear();
     _streakDates.addAll(dates.map((date) => DateTime.parse(date)));
+  }
 
+  void loadMarkers(SharedPreferences prefs) {
     String markersJson = prefs.getString('saved_markers') ?? '[]';
     List<Map<String, dynamic>> markersList = List<Map<String, dynamic>>.from(json.decode(markersJson));
     savedMarkers.clear();
@@ -90,10 +97,12 @@ class LocalUser {
         position: LatLng(markerData['latitude'], markerData['longitude']),
         draggable: false,
         icon: blueIcon,
+        infoWindow: InfoWindow( // Create the info window with the saved title
+          title: markerData['infoWindowTitle'],
+        ),
       );
       savedMarkers.add(marker);
     }
-
   }
 
 }
