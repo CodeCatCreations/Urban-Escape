@@ -10,17 +10,26 @@ class LocalUser {
   factory LocalUser() {
     return _singleton;
   }
-
+  bool hasPinned = false;
   LocalUser._internal();
 
-
   static final Set<Marker> savedMarkers = {};
-
+  List<Map<String, dynamic>> markersList = savedMarkers.map((marker) {
+    return {
+      'markerId': marker.markerId.value,
+      'latitude': marker.position.latitude,
+      'longitude': marker.position.longitude,
+    };
+  }).toList();
 
   final blueIcon = BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue);
   final List<DateTime> _streakDates = []; // a list to store the dates of the user's streaks
 
+  bool hasGoal = false;
   // a method to add a date to the user's streak
+  List<Map<String, dynamic>> getMarkersList(){
+    return markersList;
+  }
   void addStreakDate(DateTime date) {
     _streakDates.add(date);
   }
@@ -34,12 +43,18 @@ class LocalUser {
     return streak;
   }
 
+  void setGoal(){
+    hasGoal = true;
+  }
   bool goalAdded() {
-    GoalStorage goalStorage = GoalStorage();
+    /*GoalStorage goalStorage = GoalStorage();
     Future<int> storedGoal = goalStorage.readGoal();
     storedGoal.then((value) => print('Stored goal: $value'));
-    return storedGoal != 0;
+    return storedGoal == 30;
+  */
+  return hasGoal;
   }
+
 
 
   // a method to save the user's streak data to local storage
@@ -47,26 +62,31 @@ class LocalUser {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     saveDates(prefs);
     saveMarkers(prefs);
+    hasPinned = true;
   }
-
+  bool getPinStatus(){
+    return hasPinned;
+  }
   void saveDates(SharedPreferences prefs) async {
     List<String> dates = _streakDates.map((date) => date.toIso8601String()).toList();
     await prefs.setStringList('streak_dates', dates);
   }
 
   void saveMarkers(SharedPreferences prefs) async {
-    List<Map<String, dynamic>> markersList = savedMarkers.map((marker) {
+    /*markersList = savedMarkers.map((marker) {
       return {
         'markerId': marker.markerId.value,
         'latitude': marker.position.latitude,
         'longitude': marker.position.longitude,
       };
-    }).toList();
+    }).toList();*/
 
     String markersJson = json.encode(markersList);
     await prefs.setString('saved_markers', markersJson);
   }
-
+  List<Map<String, dynamic>> getMarkerList(){
+    return markersList;
+  }
 
 
   // a method to load the user's streak data from local storage
