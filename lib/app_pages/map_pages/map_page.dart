@@ -257,31 +257,72 @@ class _MapPageState extends State<MapPage> {
             left: 85.0,
             child: ElevatedButton(
               onPressed: () async {
+                /*
                 addMarkerPressed = true;
                 // Get the center coordinates of the map view
                 LatLng center = await mapController.getLatLng(
                   const ScreenCoordinate(x: 500, y: 500),
                 );
                 createSavedMarker(center);
-              },
 
-              child: addMarkerPressed ? Container(
-                color: Colors.deepOrange,
-                margin: EdgeInsets.zero,
-                padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 8.0),
-                child: const Text('Drag the marker',
-                  style: TextStyle(color:Colors.white),
+                 */
+              },
+              style: ButtonStyle(
+                backgroundColor: MaterialStateProperty.all<Color>(Colors.transparent),
+                elevation: MaterialStateProperty.all<double>(0),
+
+              ),
+
+              child: addMarkerPressed ?
+
+              ElevatedButton(
+              onPressed: null,
+              style: ButtonStyle(
+                backgroundColor: MaterialStateProperty.resolveWith<Color>(
+                      (Set<MaterialState> states) {
+                    return Colors.orange;
+                  },
                 ),
-              ) : Container(
-                color: Colors.blue,
+              ),
+              child: Container(
                 margin: EdgeInsets.zero,
                 padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 8.0),
-                child: const Text('Create marker',
-                  style: TextStyle(color:Colors.white),
+                child: const Text(
+                  'Drag the marker',
+                  style: TextStyle(color: Colors.black),
+                ),
+              ),
+            ) : ElevatedButton(
+                onPressed: () async {
+                  addMarkerPressed = true;
+                  // Get the center coordinates of the map view
+                  LatLng center = await mapController.getLatLng(
+                    const ScreenCoordinate(x: 500, y: 500),
+                  );
+                  createSavedMarker(center);
+                },
+                style: ButtonStyle(
+                  backgroundColor: MaterialStateProperty.resolveWith<Color>(
+                        (Set<MaterialState> states) {
+                      return Colors.blue;
+                    },
+                  ),
+                ),
+                child: Container(
+                  margin: EdgeInsets.zero,
+                  padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 8.0),
+                  child: const Text(
+                    'Create marker',
+                    style: TextStyle(color: Colors.white),
+                  ),
                 ),
               ),
             ),
           ),
+
+
+
+
           Positioned(
             bottom: 16.0,
             left: 20.0,
@@ -308,6 +349,16 @@ class _MapPageState extends State<MapPage> {
                         showParks = !showParks;
                       });
                     },
+                    style: ButtonStyle(
+                      backgroundColor: MaterialStateProperty.resolveWith<Color>(
+                            (Set<MaterialState> states) {
+                          if (states.contains(MaterialState.disabled)) {
+                            return Colors.grey;
+                          }
+                          return showParks ? Colors.grey : Colors.green;
+                        },
+                      ),
+                    ),
                     child: Text(showParks ? 'Hide Parks' : 'Show Parks'),
                   ),
                   const SizedBox(height: 16),
@@ -318,6 +369,16 @@ class _MapPageState extends State<MapPage> {
                             !showHighNoisePollutionPolygons;
                       });
                     },
+                    style: ButtonStyle(
+                      backgroundColor: MaterialStateProperty.resolveWith<Color>(
+                            (Set<MaterialState> states) {
+                          if (states.contains(MaterialState.disabled)) {
+                            return Colors.grey;
+                          }
+                          return showHighNoisePollutionPolygons ? Colors.grey : Colors.black54;
+                        },
+                      ),
+                    ),
                     child: Text(showHighNoisePollutionPolygons
                         ? 'Hide High Noise Pollution'
                         : 'Show High Noise Pollution'),
@@ -330,6 +391,16 @@ class _MapPageState extends State<MapPage> {
                             !showEcoSignificantAreasPolygons;
                       });
                     },
+                    style: ButtonStyle(
+                      backgroundColor: MaterialStateProperty.resolveWith<Color>(
+                            (Set<MaterialState> states) {
+                          if (states.contains(MaterialState.disabled)) {
+                            return Colors.grey;
+                          }
+                          return showEcoSignificantAreasPolygons ? Colors.blue : Colors.lightBlueAccent;
+                        },
+                      ),
+                    ),
                     child: Text(showEcoSignificantAreasPolygons
                         ? 'Hide Eco Significant Areas'
                         : 'Show Eco Significant Areas'),
