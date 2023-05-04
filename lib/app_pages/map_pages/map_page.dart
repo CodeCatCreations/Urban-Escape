@@ -26,6 +26,7 @@ class _MapPageState extends State<MapPage> {
   bool showLowPollutionPolygons = false;
   bool showEcoSignificantAreasPolygons = false;
   bool showFilters = false;
+  bool addMarkerPressed = false;
 
   final Set<Marker> parkMarkers = {};
   Set<Marker> savedMarkers = LocalUser.savedMarkers;
@@ -165,6 +166,7 @@ class _MapPageState extends State<MapPage> {
                 }
                 return marker;
               }).toSet(); // Convert back to a Set
+              addMarkerPressed = false;
               LocalUser().saveData();
               setState(() {});
             });
@@ -255,13 +257,29 @@ class _MapPageState extends State<MapPage> {
             left: 85.0,
             child: ElevatedButton(
               onPressed: () async {
+                addMarkerPressed = true;
                 // Get the center coordinates of the map view
                 LatLng center = await mapController.getLatLng(
                   const ScreenCoordinate(x: 500, y: 500),
                 );
                 createSavedMarker(center);
               },
-              child: const Text('Add Marker'),
+
+              child: addMarkerPressed ? Container(
+                color: Colors.deepOrange,
+                margin: EdgeInsets.zero,
+                padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 8.0),
+                child: const Text('Drag the marker',
+                  style: TextStyle(color:Colors.white),
+                ),
+              ) : Container(
+                color: Colors.blue,
+                margin: EdgeInsets.zero,
+                padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 8.0),
+                child: const Text('Create marker',
+                  style: TextStyle(color:Colors.white),
+                ),
+              ),
             ),
           ),
           Positioned(
@@ -303,17 +321,6 @@ class _MapPageState extends State<MapPage> {
                     child: Text(showHighNoisePollutionPolygons
                         ? 'Hide High Noise Pollution'
                         : 'Show High Noise Pollution'),
-                  ),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () {
-                      setState(() {
-                        showLowPollutionPolygons = !showLowPollutionPolygons;
-                      });
-                    },
-                    child: Text(showLowPollutionPolygons
-                        ? 'Hide Low Noise Pollution'
-                        : 'Show Low Noise Pollution'),
                   ),
                   const SizedBox(height: 16),
                   ElevatedButton(
