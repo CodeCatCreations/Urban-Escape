@@ -154,35 +154,26 @@ class _MapPageState extends State<MapPage> {
           draggable: true,
           icon: magentaIcon,
           onDragEnd: (LatLng newPosition) {
+
             setState(() {
+              Marker oldMarker = savedMarkers.firstWhere((marker) => marker.markerId.value == position.toString());
+              Marker newMarker = Marker(
+                markerId: MarkerId(newPosition.toString()),
+                position: newPosition,
+                draggable: false,
+                icon: blueIcon,
+                infoWindow: oldMarker.infoWindow,
+              );
 
-
-
-              savedMarkers = savedMarkers.map((marker) {
-                if (marker.markerId.value == position.toString()) {
-                  // Create a new marker with a new markerId and all the other parameters
-                  Marker newMarker = Marker(
-                    markerId: MarkerId(newPosition.toString()),
-                    position: newPosition,
-                    draggable: false,
-                    icon: blueIcon,
-                    infoWindow: marker.infoWindow,
-                  );
-                  return newMarker;
-                }
-                return marker;
-              }).toSet();
-
-
+              savedMarkers.remove(oldMarker);
+              savedMarkers.add(newMarker);
 
 
               addMarkerPressed = false;
               LocalUser().saveData();
               setState(() {});
+
             });
-
-
-
           },
           infoWindow: InfoWindow(
             title: position.toString(), // Set the new title for the marker
