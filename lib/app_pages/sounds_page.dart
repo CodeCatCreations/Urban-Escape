@@ -15,7 +15,7 @@ class SoundsPage extends StatelessWidget {
             imageFilePath: 'assets/icons/rainy.png',
             activatedColor: Colors.green,
             deactivatedColor: Colors.grey,
-            soundFileSource: UrlSource('https://bigsoundbank.com/UPLOAD/mp3/1019.mp3'), // Rain
+            soundFileSource: AssetSource('assets/sounds/RAINConc_Summer rain on terrace (ID 1019)_BSB.mp3'), // Rain
           ),
           SoundWidget(
             imageFilePath: 'assets/icons/thunder.png',
