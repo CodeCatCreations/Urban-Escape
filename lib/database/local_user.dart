@@ -14,7 +14,7 @@ class LocalUser {
   LocalUser._internal();
 
 
-  static final Set<Marker> savedMarkers = {}; 
+  static Set<Marker> savedMarkers = {};
   // We declare the variable to be static so that it belongs to the class and not to any instance of it.
   static const lastStopwatchTimeKey = 'last_stopwatch_time';
 
@@ -111,7 +111,7 @@ class LocalUser {
         draggable: false,
         icon: blueIcon,
         infoWindow: InfoWindow( // Create the info window with the saved title
-          title: markerData['infoWindowTitle'],
+          title: markerData['infoWindowTitle']
         ),
       );
       savedMarkers.add(marker);

@@ -29,7 +29,6 @@ class _MapPageState extends State<MapPage> {
   bool addMarkerPressed = false;
 
   final Set<Marker> parkMarkers = {};
-  Set<Marker> savedMarkers = LocalUser.savedMarkers;
   Set<Polygon> highNoisePollutionPolygonSet = HashSet<Polygon>();
   Set<Polygon> lowNoisePollutionPolygonSet = HashSet<Polygon>();
   Set<Polygon> ecoSignificantAreasPolygonSet = HashSet<Polygon>();
@@ -131,88 +130,48 @@ class _MapPageState extends State<MapPage> {
     super.initState();
 
     LocalUser().loadData();
-    savedMarkers = LocalUser.savedMarkers;
-    //Call fetchParksData() when our widget is created
     fetchParksData();
     fetchEcoSignificantAreasPolygons();
     fetchLowNoisePollutionPolygonPoints();
     fetchHighNoisePollutionPolygonPoints();
   }
 
+
   void createSavedMarker(LatLng position) {
     setState(() {
       // Check if the marker with the given MarkerId already exists in savedMarkers
-      if (savedMarkers
+      if (LocalUser.savedMarkers
           .contains(Marker(markerId: MarkerId(position.toString())))) {
         return;
       }
 
-      savedMarkers.add(
+      LocalUser.savedMarkers.add(
         Marker(
           markerId: MarkerId(position.toString()),
           position: position,
           draggable: true,
           icon: magentaIcon,
           onDragEnd: (LatLng newPosition) {
-
             setState(() {
-              Marker oldMarker = savedMarkers.firstWhere((marker) => marker.markerId.value == position.toString());
+              Marker oldMarker = LocalUser.savedMarkers.firstWhere((marker) => marker.markerId.value == position.toString());
               Marker newMarker = Marker(
                 markerId: MarkerId(newPosition.toString()),
                 position: newPosition,
                 draggable: false,
                 icon: blueIcon,
-                infoWindow: oldMarker.infoWindow,
+                infoWindow: createInfoWindow(newPosition, context)
               );
 
-              savedMarkers.remove(oldMarker);
-              savedMarkers.add(newMarker);
+              LocalUser.savedMarkers.remove(oldMarker);
+              LocalUser.savedMarkers.add(newMarker);
 
 
               addMarkerPressed = false;
-              LocalUser().saveData();
               setState(() {});
+              LocalUser().saveData();
 
             });
           },
-          infoWindow: InfoWindow(
-            title: position.toString(), // Set the new title for the marker
-            onTap: () {
-              // Show a dialog to allow the user to change the marker title
-              showDialog(
-                context: context,
-                builder: (context) {
-                  String newTitle = "";
-                  return AlertDialog(
-                    title: const Text("Change Marker Title"),
-                    content: TextField(
-                      onChanged: (value) {
-                        newTitle = value;
-                      },
-                      decoration: const InputDecoration(
-                        hintText: "Enter new title",
-                      ),
-                    ),
-                    actions: <Widget>[
-                      TextButton(
-                        child: const Text("Cancel"),
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                      ),
-                      TextButton(
-                        child: const Text("Save"),
-                        onPressed: () {
-                          changeMarkerTitle(position, newTitle);
-                          Navigator.of(context).pop();
-                        },
-                      ),
-                    ],
-                  );
-                },
-              );
-            },
-          ),
         ),
       );
     });
@@ -221,8 +180,7 @@ class _MapPageState extends State<MapPage> {
 
   void changeMarkerTitle(LatLng position, String newTitle) {
     // Refresh the map to show the new marker color
-    setState(() {
-      savedMarkers = savedMarkers.map((marker) {
+    LocalUser.savedMarkers = LocalUser.savedMarkers.map((marker) {
         if (marker.markerId.value == position.toString()) {
           return marker.copyWith(
             draggableParam: false,
@@ -233,16 +191,13 @@ class _MapPageState extends State<MapPage> {
         return marker;
       }).toSet(); // Convert back to a Set
 
-      addMarkerPressed = false;
-      LocalUser().saveData();
       setState(() {});
-    });
+      LocalUser().saveData();
   }
-
 
   @override
   Widget build(BuildContext context) {
-    final Set<Marker> allMarkers = {...parkMarkers, ...savedMarkers};
+    final Set<Marker> allMarkers = {...parkMarkers, ...LocalUser.savedMarkers};
 
     return Scaffold(
       body: GoogleMap(
@@ -253,7 +208,7 @@ class _MapPageState extends State<MapPage> {
         onMapCreated: (controller) {
           mapController = controller;
         },
-        markers: showParks ? allMarkers : savedMarkers,
+        markers: showParks ? allMarkers : LocalUser.savedMarkers,
         polygons: {
           if (showHighNoisePollutionPolygons) ...highNoisePollutionPolygonSet,
           if (showLowPollutionPolygons) ...lowNoisePollutionPolygonSet,
@@ -410,6 +365,56 @@ class _MapPageState extends State<MapPage> {
             ),
         ],
       ),
+    );
+  }
+
+  createInfoWindow(LatLng newPosition, BuildContext context) {
+    return InfoWindow(
+      title: newPosition.toString(), // Set the new title for the marker
+      onTap: () {
+        // Show a dialog to allow the user to change the marker title
+        showDialog(
+          context: context,
+          builder: (context) {
+            String newTitle = "";
+            return AlertDialog(
+              title: const Text("Change Marker Title"),
+              content: TextField(
+                onChanged: (value) {
+                  newTitle = value;
+                },
+                decoration: const InputDecoration(
+                  hintText: "Enter new title",
+                ),
+              ),
+              actions: <Widget>[
+                TextButton(
+                  child: const Text("Remove"),
+                  onPressed: () {
+                    LocalUser.savedMarkers.removeWhere((marker) => marker.markerId.value == newPosition.toString());
+                    setState(() {});
+                    LocalUser().saveData();
+                    Navigator.of(context).pop();
+                  },
+                ),
+                TextButton(
+                  child: const Text("Cancel"),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+                TextButton(
+                  child: const Text("Save"),
+                  onPressed: () {
+                    changeMarkerTitle(newPosition, newTitle);
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      },
     );
   }
 
