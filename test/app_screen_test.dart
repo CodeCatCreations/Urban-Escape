@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:urban_escape_application/app_front_page/app_screen.dart';
 import 'package:urban_escape_application/app_pages/map_pages/map_page.dart';
 import 'package:urban_escape_application/app_pages/sounds_page.dart';
-import 'package:urban_escape_application/app_pages/social_page.dart';
+import 'package:urban_escape_application/app_pages/time_page/time_tracking.dart';
 import 'package:urban_escape_application/app_pages/progress_page/progress_page.dart';
 
 
@@ -37,7 +37,7 @@ void main() {
       await tester.tap(find.byIcon(Icons.people));
       //PumpAndSettle riggers a rebuild of the widget tree and waits for all animations to complete
       await tester.pumpAndSettle(); 
-      expect(find.byType(SocialPage), findsOneWidget);
+      expect(find.byType(TimeTrackingPage), findsOneWidget);
 
       // Tap on the Progress page icon
       await tester.tap(find.byIcon(Icons.show_chart));

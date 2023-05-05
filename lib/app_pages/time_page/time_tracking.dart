@@ -1,3 +1,194 @@
+import 'package:flutter/material.dart';
+import 'package:percent_indicator/percent_indicator.dart';
+import 'dart:async';
+import 'package:urban_escape_application/database/local_user.dart';
+
+class TimeTrackingPage extends StatefulWidget {
+  const TimeTrackingPage({super.key});
+
+  @override
+  State<TimeTrackingPage> createState() => _TimeTrackingPageState();
+}
+
+class _TimeTrackingPageState extends State<TimeTrackingPage> {
+  int _passedTime = 0;
+  double _percent = 0.0;
+  int goal = 10;
+  Timer _timer = Timer(Duration.zero, () {});
+  bool click = true;
+
+  Future<void> loadLastStopwatchTime() async {
+
+    final lastTimeUserStoppedTheTime = await LocalUser.loadStopwatchTime();
+
+    // In setState we set the state of the widget with the loaded stopwatch time and the percent of the goal achieved
+    setState(() {
+      _passedTime = lastTimeUserStoppedTheTime;
+    
+      _percent = getPercent();
+    });
+  }
+
+  void saveLastStopwatchTime(int time) async {
+    await LocalUser.saveStopwatchTime(time);
+  }
+
+  double getPercent() {
+    // Calculate the percentage of the goal that has been reached based on the passed time.
+    // If the passed time is greater than the goal, set the percentage to 1.0 (or 100%).
+    // Otherwise, set the percentage to the ratio of the passed time to the goal.
+    return Duration(seconds: _passedTime).inSeconds.toDouble() > (goal * 100)
+            ? 1
+            : Duration(seconds: _passedTime).inSeconds.toDouble() / (goal * 100);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    loadLastStopwatchTime();
+  }
+
+  void startTimer() {
+    if (_timer.isActive) return;
+    _timer = Timer.periodic(const Duration(milliseconds: 10), (timer) {
+      setState(() {
+        _passedTime++;
+        _percent = getPercent();
+      });
+    });
+  }
+
+  void stopTimer() {
+    _timer.cancel();
+    // Save the current stopwatch time to shared_preferences when stopped
+    saveLastStopwatchTime(_passedTime);
+  }
+
+  void resetTimer() {
+    setState(() {
+      _passedTime = 0;
+      _percent = 0;
+    });
+    // Reset the saved stopwatch time in shared_preferences
+  }
+
+  String get timerText {
+    Duration duration = Duration(milliseconds: _passedTime * 10);
+    return "${duration.inMinutes.remainder(60).toString().padLeft(2, '0')}:${(duration.inSeconds.remainder(60)).toString().padLeft(2, '0')}";
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Colors.blue, Colors.white],
+        ),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          const Text(
+            'Time Tracking',
+            style: TextStyle(
+              fontSize: 30,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+              fontFamily: 'Pacifico',
+            ),
+          ),
+          const SizedBox(height: 20),
+          CircularPercentIndicator(
+            radius: 180,
+            lineWidth: 20.0,
+            backgroundWidth: 15,
+            animation: true,
+            animationDuration: 10,
+            animateFromLastPercent: true,
+            percent: _percent,
+            circularStrokeCap: CircularStrokeCap.round,
+            progressColor:
+                _percent == 1.0 ? Colors.green.shade300 : Colors.blue.shade300,
+            backgroundColor: Colors.white54,
+            center: Container(
+              alignment: Alignment.bottomCenter,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Text(
+                    timerText,
+                    style: const TextStyle(
+                      fontSize: 50.0,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                  Text(
+                    "Daily progress: " + (_percent*100).toInt().toString()+"%",
+                    style: const TextStyle(
+                      fontSize: 20.0,
+                      color: Colors.white,
+                    ),
+                  ),
+                  IconButton(
+                    alignment: Alignment.bottomCenter,
+                    iconSize: 100,
+                    onPressed: () {
+                      setState(() {
+                        click = !click;
+                        (click == false) ? startTimer() : stopTimer();
+                      });
+                    },
+                    icon: Icon((click == false) ? Icons.pause_circle_filled :
+                    Icons.play_circle_filled, color: Colors.grey.shade50),
+                  ),
+                ],
+              )
+            )
+          ),
+          const SizedBox(height: 20),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+
+              ElevatedButton(
+                child: const Text('Reset'),
+                onPressed: () {
+                  setState(() {
+                    click = true;
+                  });
+                  resetTimer();
+                },
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+           
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /*import 'package:flutter/material.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 
@@ -227,7 +418,7 @@ class Person {
 
   Person(this.name, this.email);
 }*/
-
+/*
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
@@ -334,4 +525,5 @@ class _SocialPageState extends State<SocialPage> {
     );
   }
 }
+*/
 

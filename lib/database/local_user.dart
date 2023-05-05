@@ -14,12 +14,26 @@ class LocalUser {
   LocalUser._internal();
 
 
-  static final Set<Marker> savedMarkers = {};
+  static final Set<Marker> savedMarkers = {}; 
+  // We declare the variable to be static so that it belongs to the class and not to any instance of it.
+  static const lastStopwatchTimeKey = 'last_stopwatch_time';
 
 
   final blueIcon = BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue);
-  final List<DateTime> _streakDates = []; // a list to store the dates of the user's streaks
+  final List<DateTime> _streakDates = []; // a list to store the dates of the user's streaks.... Varför inte STATIC?????
 
+  // This function loads the last saved stopwatch time from shared preferences.
+  // It returns a Future<int>, which means that it will be completed with an integer value in the future.
+  // We mark it as async because it makes use of the SharedPreferences plugin, which is asynchronous.
+  static Future<int> loadStopwatchTime() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getInt(lastStopwatchTimeKey) ?? 0; // Return the saved time, or 0 if it's not present.
+  }
+
+  static Future<void> saveStopwatchTime(int time) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(lastStopwatchTimeKey, time); //Save the current stopwatch time to shared preferences.
+  }
 
   // a method to add a date to the user's streak
   void addStreakDate(DateTime date) {
@@ -51,7 +65,7 @@ class LocalUser {
 
     saveDates(prefs);
     saveMarkers(prefs);
-
+    //saveElapsedTime(prefs);
   }
 
   void saveDates(SharedPreferences prefs) async {
@@ -72,7 +86,6 @@ class LocalUser {
     String markersJson = json.encode(markersList);
     await prefs.setString('saved_markers', markersJson);
   }
-
 
   // a method to load the user's streak data from local storage
   Future<void> loadData() async {
@@ -104,5 +117,4 @@ class LocalUser {
       savedMarkers.add(marker);
     }
   }
-
 }
