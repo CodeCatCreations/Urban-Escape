@@ -10,42 +10,43 @@ class SoundsPage extends StatelessWidget {
     return Scaffold(
       body: GridView.count(
         crossAxisCount: 2,
+        childAspectRatio: 1.1,
         children: [
           SoundWidget(
             imageFilePath: 'assets/icons/rainy.png',
             activatedColor: Colors.green,
             deactivatedColor: Colors.grey,
-            soundFileSource: AssetSource('assets/sounds/RAINConc_Summer rain on terrace (ID 1019)_BSB.mp3'), // Rain
+            soundFileSource: AssetSource('sounds/Rain.mp3'), // Rain
           ),
           SoundWidget(
             imageFilePath: 'assets/icons/thunder.png',
             activatedColor: Colors.green,
             deactivatedColor: Colors.grey,
-            soundFileSource: UrlSource('https://bigsoundbank.com/UPLOAD/mp3/2718.mp3'), // Thunder
+            soundFileSource: AssetSource('sounds/Thunder.mp3'), // Thunder
           ),
           SoundWidget(
             imageFilePath: 'assets/icons/wind.png',
             activatedColor: Colors.green,
             deactivatedColor: Colors.grey,
-            soundFileSource: UrlSource('https://bigsoundbank.com/UPLOAD/mp3/0908.mp3'), // Wind
+            soundFileSource: AssetSource('sounds/Wind.mp3'), // Wind
           ),
           SoundWidget(
             imageFilePath: 'assets/icons/wave.png',
             activatedColor: Colors.green,
             deactivatedColor: Colors.grey,
-            soundFileSource: UrlSource('https://bigsoundbank.com/UPLOAD/mp3/0265.mp3'), // Waves
+            soundFileSource: AssetSource('sounds/Waves.mp3'), // Waves
           ),
           SoundWidget(
             imageFilePath: 'assets/icons/bird.png',
             activatedColor: Colors.green,
             deactivatedColor: Colors.grey,
-            soundFileSource: UrlSource('https://bigsoundbank.com/UPLOAD/mp3/0100.mp3'), // Birds
+            soundFileSource: AssetSource('sounds/Birds.mp3'), // Birds
           ),
           SoundWidget(
             imageFilePath: 'assets/icons/campfire.png',
             activatedColor: Colors.green,
             deactivatedColor: Colors.grey,
-            soundFileSource: UrlSource('https://bigsoundbank.com/UPLOAD/mp3/0989.mp3'), // Campfire
+            soundFileSource: AssetSource('sounds/Campfire.mp3'), // Campfire
           ),
         ],
       ),
@@ -98,7 +99,7 @@ class _SoundWidgetState extends State<SoundWidget> {
             onPressed: _toggleSound,
           ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 0),
         VolumeSlider(
           value: _volume,
           onChanged: _setVolume,
