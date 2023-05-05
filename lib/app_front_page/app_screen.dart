@@ -82,7 +82,6 @@ class _AppScreenState extends State<AppScreen> {
         type: BottomNavigationBarType.fixed,
         currentIndex: _currentIndex,
         selectedItemColor: Colors.blue,
-        // backgroundColor: Colors.yellow,
         unselectedItemColor: Colors.green,
         onTap: (int index) {
           _tappedItem(index);
