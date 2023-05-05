@@ -13,28 +13,34 @@ class TimeTrackingPage extends StatefulWidget {
 class _TimeTrackingPageState extends State<TimeTrackingPage> {
   int _passedTime = 0;
   double _percent = 0.0;
-  double goal = 10;
+  int goal = 10;
   Timer _timer = Timer(Duration.zero, () {});
   bool click = true;
 
-Future<void> loadLastStopwatchTime() async {
+  Future<void> loadLastStopwatchTime() async {
 
-  final lastTimeUserStoppedTheTime = await LocalUser.loadStopwatchTime();
+    final lastTimeUserStoppedTheTime = await LocalUser.loadStopwatchTime();
 
-  // In setState we set the state of the widget with the loaded stopwatch time and the percent of the goal achieved
-  setState(() {
-    _passedTime = lastTimeUserStoppedTheTime;
-  // Calculate the percentage of the goal that has been reached based on the passed time.
-  // If the passed time is greater than the goal, set the percentage to 1.0 (or 100%).
-  // Otherwise, set the percentage to the ratio of the passed time to the goal.
-    _percent = Duration(seconds: _passedTime).inSeconds.toDouble() > goal ? 1 
-    : Duration(seconds: _passedTime).inSeconds.toDouble() / goal;
-  });
-}
+    // In setState we set the state of the widget with the loaded stopwatch time and the percent of the goal achieved
+    setState(() {
+      _passedTime = lastTimeUserStoppedTheTime;
+    
+      _percent = getPercent();
+    });
+  }
 
- void saveLastStopwatchTime(int time) async {
-  await LocalUser.saveStopwatchTime(time);
-}
+  void saveLastStopwatchTime(int time) async {
+    await LocalUser.saveStopwatchTime(time);
+  }
+
+  double getPercent() {
+    // Calculate the percentage of the goal that has been reached based on the passed time.
+    // If the passed time is greater than the goal, set the percentage to 1.0 (or 100%).
+    // Otherwise, set the percentage to the ratio of the passed time to the goal.
+    return Duration(seconds: _passedTime).inSeconds.toDouble() > (goal * 100)
+            ? 1
+            : Duration(seconds: _passedTime).inSeconds.toDouble() / (goal * 100);
+  }
 
   @override
   void initState() {
@@ -44,12 +50,10 @@ Future<void> loadLastStopwatchTime() async {
 
   void startTimer() {
     if (_timer.isActive) return;
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+    _timer = Timer.periodic(const Duration(milliseconds: 10), (timer) {
       setState(() {
         _passedTime++;
-        _percent = Duration(seconds: _passedTime).inSeconds.toDouble() > goal
-            ? 1
-            : Duration(seconds: _passedTime).inSeconds.toDouble() / goal;
+        _percent = getPercent();
       });
     });
   }
@@ -69,7 +73,7 @@ Future<void> loadLastStopwatchTime() async {
   }
 
   String get timerText {
-    Duration duration = Duration(seconds: _passedTime);
+    Duration duration = Duration(milliseconds: _passedTime * 10);
     return "${duration.inMinutes.remainder(60).toString().padLeft(2, '0')}:${(duration.inSeconds.remainder(60)).toString().padLeft(2, '0')}";
   }
 
@@ -101,7 +105,7 @@ Future<void> loadLastStopwatchTime() async {
             lineWidth: 20.0,
             backgroundWidth: 15,
             animation: true,
-            animationDuration: 1000,
+            animationDuration: 10,
             animateFromLastPercent: true,
             percent: _percent,
             circularStrokeCap: CircularStrokeCap.round,
