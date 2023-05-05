@@ -1,32 +1,63 @@
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 import 'dart:async';
+import 'package:urban_escape_application/database/local_user.dart';
 
-class SocialPage extends StatefulWidget {
-  const SocialPage({super.key});
+class TimeTrackingPage extends StatefulWidget {
+  const TimeTrackingPage({super.key});
 
   @override
-  State<SocialPage> createState() => _SocialPageState();
+  State<TimeTrackingPage> createState() => _TimeTrackingPageState();
 }
 
-class _SocialPageState extends State<SocialPage> {
+class _TimeTrackingPageState extends State<TimeTrackingPage> {
   int _passedTime = 0;
   double _percent = 0.0;
-  double goal = 20.0;
+  double goal = 10.0;
   Timer _timer = Timer(Duration.zero, () {});
+  bool click = true;
+
+Future<void> loadLastStopwatchTime() async {
+
+  final lastTimeUserStoppedTheTime = await LocalUser.loadStopwatchTime();
+
+  // In setState we set the state of the widget with the loaded stopwatch time and the percent of the goal achieved
+  setState(() {
+    _passedTime = lastTimeUserStoppedTheTime;
+  // Calculate the percentage of the goal that has been reached based on the passed time.
+  // If the passed time is greater than the goal, set the percentage to 1.0 (or 100%).
+  // Otherwise, set the percentage to the ratio of the passed time to the goal.
+    _percent = Duration(seconds: _passedTime).inSeconds.toDouble() > goal ? 1 
+    : Duration(seconds: _passedTime).inSeconds.toDouble() / goal;
+  });
+}
+
+ void saveLastStopwatchTime(int time) async {
+  await LocalUser.saveStopwatchTime(time);
+}
+
+  @override
+  void initState() {
+    super.initState();
+    loadLastStopwatchTime();
+  }
 
   void startTimer() {
     if (_timer.isActive) return;
-    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       setState(() {
         _passedTime++;
-        _percent = Duration(seconds: _passedTime).inSeconds.toDouble() > goal ? 1 : Duration(seconds: _passedTime).inSeconds.toDouble() / goal;
+        _percent = Duration(seconds: _passedTime).inSeconds.toDouble() > goal
+            ? 1
+            : Duration(seconds: _passedTime).inSeconds.toDouble() / goal;
       });
     });
   }
 
   void stopTimer() {
     _timer.cancel();
+    // Save the current stopwatch time to shared_preferences when stopped
+    saveLastStopwatchTime(_passedTime);
   }
 
   void resetTimer() {
@@ -34,6 +65,7 @@ class _SocialPageState extends State<SocialPage> {
       _passedTime = 0;
       _percent = 0;
     });
+    // Reset the saved stopwatch time in shared_preferences
   }
 
   String get timerText {
@@ -43,46 +75,88 @@ class _SocialPageState extends State<SocialPage> {
 
   @override
   Widget build(BuildContext context) {
-
-    return Column(
-      children: <Widget>[
-        Padding(
-          padding: const EdgeInsets.only(top: 85.0),
-          child: CircularPercentIndicator(
-            radius: 80,
-            lineWidth: 10.0,
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Colors.blue, Colors.white],
+        ),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          const Text(
+            'Time Tracking',
+            style: TextStyle(
+              fontSize: 30,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+              fontFamily: 'Pacifico',
+            ),
+          ),
+          const SizedBox(height: 20),
+          CircularPercentIndicator(
+            radius: 180,
+            lineWidth: 20.0,
+            backgroundWidth: 17,
             animation: true,
             animationDuration: 1000,
             animateFromLastPercent: true,
             percent: _percent,
-            center: Text(timerText, textScaleFactor: 1.6),
-            progressColor: Colors.blue,
+            circularStrokeCap: CircularStrokeCap.round,
+            progressColor:
+                _percent == 1.0 ? Colors.green.shade300 : Colors.blue.shade300,
+            center: Text(
+              timerText,
+              style: const TextStyle(
+                fontSize: 50.0,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
           ),
-        ),
-        SizedBox(height: 20),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            ElevatedButton(
-              child: Text('Start'),
-              onPressed: startTimer,
-            ),
-            SizedBox(width: 20),
-            ElevatedButton(
-              child: Text('Stop'),
-              onPressed: stopTimer,
-            ),
-            SizedBox(width: 20),
-            ElevatedButton(
-              child: Text('Reset'),
-              onPressed: resetTimer,
-            ),
-          ],
-        )
-      ],
+          const SizedBox(height: 20),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: <Widget>[
+              ElevatedButton(
+                child: Text(click ? 'Start' : 'Resume'),
+                onPressed: () {
+                  setState(() {
+                    click = true;
+                  });
+                  startTimer();
+                },
+              ),
+              ElevatedButton(
+                child: const Text('Stop'),
+                onPressed: () {
+                  setState(() {
+                    click = false;
+                  });
+                  stopTimer();
+                },
+              ),
+              ElevatedButton(
+                child: const Text('Reset'),
+                onPressed: () {
+                  setState(() {
+                    click = true;
+                  });
+                  resetTimer();
+                },
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }
+           
+
+
 
 
 

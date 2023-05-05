@@ -3,7 +3,7 @@ import 'package:urban_escape_application/app_front_page/app_center_page.dart';
 import 'package:urban_escape_application/app_pages/settings_page.dart';
 import '../app_pages/progress_page/goal_storage.dart';
 import '../app_pages/progress_page/progress_page.dart';
-import '../app_pages/social_page.dart';
+import '../app_pages/time_page/time_tracking.dart';
 import '../app_pages/sounds_page.dart';
 import '../app_pages/map_pages/map_page.dart';
 import '../app_pages/progress_page/daily_banner_page.dart';
@@ -26,7 +26,7 @@ class _AppScreenState extends State<AppScreen> {
     ProgressPage(storage: GoalStorage()),
     const MapPage(),
     const SoundsPage(),
-    SocialPage(),
+    const TimeTrackingPage(),
     const AppCenterPage(),
   ];
 
@@ -105,8 +105,8 @@ class _AppScreenState extends State<AppScreen> {
           ),
 
           BottomNavigationBarItem(
-            icon: Icon(Icons.people),
-            label: 'Social',
+            icon: Icon(Icons.timer_rounded),
+            label: 'Stopwatch',
           ),
         ],
       ),
