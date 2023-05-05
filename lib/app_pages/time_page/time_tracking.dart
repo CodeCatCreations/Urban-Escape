@@ -13,7 +13,7 @@ class TimeTrackingPage extends StatefulWidget {
 class _TimeTrackingPageState extends State<TimeTrackingPage> {
   int _passedTime = 0;
   double _percent = 0.0;
-  double goal = 10.0;
+  double goal = 10;
   Timer _timer = Timer(Duration.zero, () {});
   bool click = true;
 
@@ -99,7 +99,7 @@ Future<void> loadLastStopwatchTime() async {
           CircularPercentIndicator(
             radius: 180,
             lineWidth: 20.0,
-            backgroundWidth: 17,
+            backgroundWidth: 15,
             animation: true,
             animationDuration: 1000,
             animateFromLastPercent: true,
@@ -107,37 +107,48 @@ Future<void> loadLastStopwatchTime() async {
             circularStrokeCap: CircularStrokeCap.round,
             progressColor:
                 _percent == 1.0 ? Colors.green.shade300 : Colors.blue.shade300,
-            center: Text(
-              timerText,
-              style: const TextStyle(
-                fontSize: 50.0,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
+            backgroundColor: Colors.white54,
+            center: Container(
+              alignment: Alignment.bottomCenter,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Text(
+                    timerText,
+                    style: const TextStyle(
+                      fontSize: 50.0,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                  Text(
+                    "Daily progress: " + (_percent*100).toInt().toString()+"%",
+                    style: const TextStyle(
+                      fontSize: 20.0,
+                      color: Colors.white,
+                    ),
+                  ),
+                  IconButton(
+                    alignment: Alignment.bottomCenter,
+                    iconSize: 100,
+                    onPressed: () {
+                      setState(() {
+                        click = !click;
+                        (click == false) ? startTimer() : stopTimer();
+                      });
+                    },
+                    icon: Icon((click == false) ? Icons.pause_circle_filled :
+                    Icons.play_circle_filled, color: Colors.grey.shade50),
+                  ),
+                ],
+              )
+            )
           ),
           const SizedBox(height: 20),
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              ElevatedButton(
-                child: Text(click ? 'Start' : 'Resume'),
-                onPressed: () {
-                  setState(() {
-                    click = true;
-                  });
-                  startTimer();
-                },
-              ),
-              ElevatedButton(
-                child: const Text('Stop'),
-                onPressed: () {
-                  setState(() {
-                    click = false;
-                  });
-                  stopTimer();
-                },
-              ),
+
               ElevatedButton(
                 child: const Text('Reset'),
                 onPressed: () {
