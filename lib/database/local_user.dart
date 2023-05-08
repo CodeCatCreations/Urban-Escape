@@ -13,8 +13,7 @@ class LocalUser {
 
   bool hasPinned = false;
   LocalUser._internal();
-
-  static final Set<Marker> savedMarkers = {};
+/*
   List<Map<String, dynamic>> markersList = savedMarkers.map((marker) {
     return {
       'markerId': marker.markerId.value,
@@ -22,6 +21,7 @@ class LocalUser {
       'longitude': marker.position.longitude,
     };
   }).toList();
+  */
 
 
   static Set<Marker> savedMarkers = {};
@@ -49,9 +49,11 @@ class LocalUser {
   }
 
   // a method to add a date to the user's streak
+  /*
   List<Map<String, dynamic>> getMarkersList(){
     return markersList;
   }
+  */
 
   void addStreakDate(DateTime date) {
     _streakDates.add(date);
@@ -106,23 +108,24 @@ class LocalUser {
   }
 
   void saveMarkers(SharedPreferences prefs) async {
-    /*markersList = savedMarkers.map((marker) {
+    List<Map<String, dynamic>> markersList = savedMarkers.map((marker) {
       return {
         'markerId': marker.markerId.value,
         'latitude': marker.position.latitude,
         'longitude': marker.position.longitude,
         'infoWindowTitle' : marker.infoWindow.title
       };
-    }).toList();*/
+    }).toList();
 
     String markersJson = json.encode(markersList);
     await prefs.setString('saved_markers', markersJson);
   }
 
-
+/*
   List<Map<String, dynamic>> getMarkerList(){
     return markersList;
   }
+  */
 
   // a method to load the user's streak data from local storage
   Future<void> loadData() async {
