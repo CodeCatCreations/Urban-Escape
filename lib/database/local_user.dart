@@ -11,7 +11,17 @@ class LocalUser {
     return _singleton;
   }
 
+  bool hasPinned = false;
   LocalUser._internal();
+
+  static final Set<Marker> savedMarkers = {};
+  List<Map<String, dynamic>> markersList = savedMarkers.map((marker) {
+    return {
+      'markerId': marker.markerId.value,
+      'latitude': marker.position.latitude,
+      'longitude': marker.position.longitude,
+    };
+  }).toList();
 
 
   static Set<Marker> savedMarkers = {};
@@ -30,15 +40,23 @@ class LocalUser {
     return prefs.getInt(lastStopwatchTimeKey) ?? 0; // Return the saved time, or 0 if it's not present.
   }
 
+
+  bool hasGoal = false;
+
   static Future<void> saveStopwatchTime(int time) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt(lastStopwatchTimeKey, time); //Save the current stopwatch time to shared preferences.
   }
 
   // a method to add a date to the user's streak
+  List<Map<String, dynamic>> getMarkersList(){
+    return markersList;
+  }
+
   void addStreakDate(DateTime date) {
     _streakDates.add(date);
   }
+
   // a method to get the user's current streak
   int getCurrentStreak() {
     int streak = 0;
@@ -49,23 +67,37 @@ class LocalUser {
     return streak;
   }
 
-  Future<bool> goalAdded() async {
-    GoalStorage goalStorage = GoalStorage();
-    if (await goalStorage.readGoal() == 0){
-      return false;
-    }
-    return true;
+  void setGoal(){
+    hasGoal = true;
+    SharedPreferences.getInstance().then((prefs) {
+      prefs.setBool('has_goal', hasGoal);
+    });
   }
 
-
+  bool goalAdded() {
+    /*GoalStorage goalStorage = GoalStorage();
+    Future<int> storedGoal = goalStorage.readGoal();
+    storedGoal.then((value) => print('Stored goal: $value'));
+    return storedGoal == 30;
+  */
+  return hasGoal;
+  }
 
   // a method to save the user's streak data to local storage
   Future <void> saveData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-
     saveDates(prefs);
     saveMarkers(prefs);
+
+    hasPinned = true;
+    prefs.setBool('has_goal', hasGoal);
+  }
+
+  bool getPinStatus(){
+    return hasPinned;
+
     //saveElapsedTime(prefs);
+
   }
 
   void saveDates(SharedPreferences prefs) async {
@@ -74,17 +106,22 @@ class LocalUser {
   }
 
   void saveMarkers(SharedPreferences prefs) async {
-    List<Map<String, dynamic>> markersList = savedMarkers.map((marker) {
+    /*markersList = savedMarkers.map((marker) {
       return {
         'markerId': marker.markerId.value,
         'latitude': marker.position.latitude,
         'longitude': marker.position.longitude,
         'infoWindowTitle' : marker.infoWindow.title
       };
-    }).toList();
+    }).toList();*/
 
     String markersJson = json.encode(markersList);
     await prefs.setString('saved_markers', markersJson);
+  }
+
+
+  List<Map<String, dynamic>> getMarkerList(){
+    return markersList;
   }
 
   // a method to load the user's streak data from local storage
@@ -116,5 +153,8 @@ class LocalUser {
       );
       savedMarkers.add(marker);
     }
+
+    hasGoal = prefs.getBool('has_goal') ?? false;
+
   }
 }

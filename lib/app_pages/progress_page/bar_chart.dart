@@ -1,6 +1,5 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-import 'package:urban_escape_application/app_pages/progress_page/chart_container.dart';
 
 class BarChartContent extends StatelessWidget {
 
@@ -77,14 +76,6 @@ class BarChartContent extends StatelessWidget {
       ),
     );
 
-    /*
-    return Expanded(
-          child: Container(
-            padding: const EdgeInsets.only(top: 10),
-            child: chart
-          ),
-        ); */
-
     return SizedBox(
       height: MediaQuery.of(context).size.height * 0.45, // set a fixed height for the chart
       width: MediaQuery.of(context).size.width * 0.8,
@@ -92,12 +83,10 @@ class BarChartContent extends StatelessWidget {
         scrollDirection: Axis.horizontal,
         itemCount: barChartGroupData.length,
         itemBuilder: (context, index) {
-          return Expanded(
-            child: Container(
+          return Container(
               width: MediaQuery.of(context).size.width * 0.8,
               padding: const EdgeInsets.only(top: 10),
               child: chart
-            ),
           );
         }
       )
