@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:urban_escape_application/app_pages/progress_page/goal_storage.dart';
 
 
 class LocalUser {
@@ -17,6 +16,7 @@ class LocalUser {
   static final Set<Marker> savedMarkers = {}; 
   // We declare the variable to be static so that it belongs to the class and not to any instance of it.
   static const lastStopwatchTimeKey = 'last_stopwatch_time';
+  static const weeklyGoalKey = 'weekly_goal';
 
 
   final blueIcon = BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue);
@@ -35,6 +35,17 @@ class LocalUser {
     await prefs.setInt(lastStopwatchTimeKey, time); //Save the current stopwatch time to shared preferences.
   }
 
+  /// This function loads the current weekly goal from shared preferences
+  static Future<int> loadWeeklyGoal() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getInt(weeklyGoalKey) ?? 0; // Return the current goal, or 0 if it's not present.
+  }
+
+  static Future<void> saveWeeklyGoal(int goal) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(weeklyGoalKey, goal); //Save the new weekly goal to shared preferences.
+  }
+
   // a method to add a date to the user's streak
   void addStreakDate(DateTime date) {
     _streakDates.add(date);
@@ -50,8 +61,7 @@ class LocalUser {
   }
 
   Future<bool> goalAdded() async {
-    GoalStorage goalStorage = GoalStorage();
-    if (await goalStorage.readGoal() == 0){
+    if (await loadWeeklyGoal() == 0){
       return false;
     }
     return true;

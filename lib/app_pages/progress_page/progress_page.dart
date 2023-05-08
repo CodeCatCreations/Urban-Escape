@@ -3,15 +3,13 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 
+import '../../database/local_user.dart';
 import 'achievement_page.dart';
 import 'bar_chart.dart';
 import 'chart_container.dart';
-import 'goal_storage.dart';
 
 class ProgressPage extends StatefulWidget {
-  const ProgressPage({Key? key, required this.storage}) : super(key: key);
-
-  final GoalStorage storage;
+  const ProgressPage({Key? key}) : super(key: key);
   
   @override
   ProgressPageState createState() => ProgressPageState();
@@ -19,7 +17,7 @@ class ProgressPage extends StatefulWidget {
 
 class ProgressPageState extends State<ProgressPage> {
   int minutes = 102;
-  int _goal = 110;
+  int _goal = 120;
   int animateDuration = 1000;
 
   final _formKey = GlobalKey<FormState>();
@@ -27,20 +25,28 @@ class ProgressPageState extends State<ProgressPage> {
   @override
   void initState() {
     super.initState();
-    widget.storage.readGoal().then((value) {
-      setState(() {
-        _goal = value;
-        if (_goal == 0) _goal = 1;
-      });
+    loadWeeklyGoal();
+  }
+
+  Future<void> loadWeeklyGoal() async {
+
+    final currentGoal = await LocalUser.loadWeeklyGoal();
+
+    // In setState we set the state of the widget with the loaded stopwatch time and the percent of the goal achieved
+    setState(() {
+      if (currentGoal == 0) {
+        _saveNewWeeklyGoal(_goal);
+      } else {
+        _goal = currentGoal;
+      }
     });
   }
 
-  Future<File> _setGoal(int newGoal) {
+  void _saveNewWeeklyGoal(int newGoal) async {
     setState(() {
       _goal = newGoal;
     });
-
-    return widget.storage.writeGoal(_goal);
+    await LocalUser.saveWeeklyGoal(newGoal);
   }
 
   @override
@@ -123,7 +129,7 @@ class ProgressPageState extends State<ProgressPage> {
                                                 onPressed: () {
                                                   if (_formKey.currentState!.validate()) {
                                                     _formKey.currentState!.save();
-                                                    _setGoal(int.parse(textEditingController.text));
+                                                    _saveNewWeeklyGoal(int.parse(textEditingController.text));
                                                     Navigator.of(context).pop();
                                                   }
                                                 },
@@ -171,6 +177,7 @@ class ProgressPageState extends State<ProgressPage> {
                         width: MediaQuery.of(context).size.width - 50.0,
                         animation: true,
                         animationDuration: animateDuration,
+                        animateFromLastPercent: true,
                         lineHeight: 25.0,
                         percent: percent,
                         center: Text('${(percent * 100).toStringAsFixed(0)}%', textScaleFactor: 1.2),
