@@ -26,13 +26,13 @@ class _MapPageState extends State<MapPage> {
   bool showLowPollutionPolygons = false;
   bool showEcoSignificantAreasPolygons = false;
   bool showFilters = false;
+  bool addMarkerPressed = false;
 
   final Set<Marker> parkMarkers = {};
-  Set<Marker> savedMarkers = LocalUser.savedMarkers;
   Set<Polygon> highNoisePollutionPolygonSet = HashSet<Polygon>();
   Set<Polygon> lowNoisePollutionPolygonSet = HashSet<Polygon>();
   Set<Polygon> ecoSignificantAreasPolygonSet = HashSet<Polygon>();
-  Set<Polygon> biotoppolygonsSet = HashSet<Polygon>();
+  Set<Polygon> biotopePolygonSet = HashSet<Polygon>();
   List<Map<String, dynamic>>? parksData;
 
   //Fetch park data from MariaDB
@@ -56,7 +56,6 @@ class _MapPageState extends State<MapPage> {
       });
     } catch (error) {
       // Handle the error here
-      print('Error: $error');
     }
   }
 
@@ -131,23 +130,22 @@ class _MapPageState extends State<MapPage> {
     super.initState();
 
     LocalUser().loadData();
-    savedMarkers = LocalUser.savedMarkers;
-    //Call fetchParksData() when our widget is created
     fetchParksData();
     fetchEcoSignificantAreasPolygons();
     fetchLowNoisePollutionPolygonPoints();
     fetchHighNoisePollutionPolygonPoints();
   }
 
+
   void createSavedMarker(LatLng position) {
     setState(() {
       // Check if the marker with the given MarkerId already exists in savedMarkers
-      if (savedMarkers
+      if (LocalUser.savedMarkers
           .contains(Marker(markerId: MarkerId(position.toString())))) {
         return;
       }
 
-      savedMarkers.add(
+      LocalUser.savedMarkers.add(
         Marker(
           markerId: MarkerId(position.toString()),
           position: position,
@@ -155,82 +153,51 @@ class _MapPageState extends State<MapPage> {
           icon: magentaIcon,
           onDragEnd: (LatLng newPosition) {
             setState(() {
-              savedMarkers = savedMarkers.map((marker) {
-                if (marker.markerId.value == position.toString()) {
-                  return marker.copyWith(
-                    positionParam: newPosition,
-                    draggableParam: false,
-                    iconParam: blueIcon,
-                  );
-                }
-                return marker;
-              }).toSet(); // Convert back to a Set
-              LocalUser().saveData();
+              Marker oldMarker = LocalUser.savedMarkers.firstWhere((marker) => marker.markerId.value == position.toString());
+              Marker newMarker = Marker(
+                markerId: MarkerId(newPosition.toString()),
+                position: newPosition,
+                draggable: false,
+                icon: blueIcon,
+                infoWindow: createInfoWindow(newPosition, context)
+              );
+
+              LocalUser.savedMarkers.remove(oldMarker);
+              LocalUser.savedMarkers.add(newMarker);
+
+
+              addMarkerPressed = false;
               setState(() {});
+              LocalUser().saveData();
+
             });
           },
-          infoWindow: InfoWindow(
-            title: position.toString(), // Set the new title for the marker
-            onTap: () {
-              // Show a dialog to allow the user to change the marker title
-              showDialog(
-                context: context,
-                builder: (context) {
-                  String newTitle = "";
-                  return AlertDialog(
-                    title: const Text("Change Marker Title"),
-                    content: TextField(
-                      onChanged: (value) {
-                        newTitle = value;
-                      },
-                      decoration: const InputDecoration(
-                        hintText: "Enter new title",
-                      ),
-                    ),
-                    actions: <Widget>[
-                      TextButton(
-                        child: const Text("Cancel"),
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                      ),
-                      TextButton(
-                        child: const Text("Save"),
-                        onPressed: () {
-                          changeMarkerTitle(position, newTitle);
-                          Navigator.of(context).pop();
-                        },
-                      ),
-                    ],
-                  );
-                },
-              );
-            },
-          ),
         ),
       );
     });
   }
 
+
   void changeMarkerTitle(LatLng position, String newTitle) {
     // Refresh the map to show the new marker color
-    setState(() {
-      savedMarkers = savedMarkers.map((marker) {
+    LocalUser.savedMarkers = LocalUser.savedMarkers.map((marker) {
         if (marker.markerId.value == position.toString()) {
           return marker.copyWith(
-              infoWindowParam: marker.infoWindow.copyWith(titleParam: newTitle),
-              iconParam: blueIcon);
+            draggableParam: false,
+            iconParam: blueIcon,
+            infoWindowParam: marker.infoWindow.copyWith(titleParam: newTitle),
+          );
         }
         return marker;
       }).toSet(); // Convert back to a Set
-      LocalUser().saveData();
+
       setState(() {});
-    });
+      LocalUser().saveData();
   }
 
   @override
   Widget build(BuildContext context) {
-    final Set<Marker> allMarkers = {...parkMarkers, ...savedMarkers};
+    final Set<Marker> allMarkers = {...parkMarkers, ...LocalUser.savedMarkers};
 
     return Scaffold(
       body: GoogleMap(
@@ -241,7 +208,7 @@ class _MapPageState extends State<MapPage> {
         onMapCreated: (controller) {
           mapController = controller;
         },
-        markers: showParks ? allMarkers : savedMarkers,
+        markers: showParks ? allMarkers : LocalUser.savedMarkers,
         polygons: {
           if (showHighNoisePollutionPolygons) ...highNoisePollutionPolygonSet,
           if (showLowPollutionPolygons) ...lowNoisePollutionPolygonSet,
@@ -254,16 +221,63 @@ class _MapPageState extends State<MapPage> {
             bottom: 16.0,
             left: 85.0,
             child: ElevatedButton(
-              onPressed: () async {
-                // Get the center coordinates of the map view
-                LatLng center = await mapController.getLatLng(
-                  const ScreenCoordinate(x: 500, y: 500),
-                );
-                createSavedMarker(center);
-              },
-              child: const Text('Add Marker'),
+              onPressed: () async {},
+              style: ButtonStyle(
+                backgroundColor: MaterialStateProperty.all<Color>(Colors.transparent),
+                elevation: MaterialStateProperty.all<double>(0),
+
+              ),
+
+              child: addMarkerPressed ?
+
+              ElevatedButton(
+              onPressed: null,
+              style: ButtonStyle(
+                backgroundColor: MaterialStateProperty.resolveWith<Color>(
+                      (Set<MaterialState> states) {
+                    return Colors.orange;
+                  },
+                ),
+              ),
+              child: Container(
+                margin: EdgeInsets.zero,
+                padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 8.0),
+                child: const Text(
+                  'Drag the marker',
+                  style: TextStyle(color: Colors.black),
+                ),
+              ),
+            ) : ElevatedButton(
+                onPressed: () async {
+                  addMarkerPressed = true;
+                  // Get the center coordinates of the map view
+                  LatLng center = await mapController.getLatLng(
+                    const ScreenCoordinate(x: 500, y: 500),
+                  );
+                  createSavedMarker(center);
+                },
+                style: ButtonStyle(
+                  backgroundColor: MaterialStateProperty.resolveWith<Color>(
+                        (Set<MaterialState> states) {
+                      return Colors.blue;
+                    },
+                  ),
+                ),
+                child: Container(
+                  margin: EdgeInsets.zero,
+                  padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 8.0),
+                  child: const Text(
+                    'Create marker',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+              ),
             ),
           ),
+
+
+
+
           Positioned(
             bottom: 16.0,
             left: 20.0,
@@ -290,6 +304,16 @@ class _MapPageState extends State<MapPage> {
                         showParks = !showParks;
                       });
                     },
+                    style: ButtonStyle(
+                      backgroundColor: MaterialStateProperty.resolveWith<Color>(
+                            (Set<MaterialState> states) {
+                          if (states.contains(MaterialState.disabled)) {
+                            return Colors.grey;
+                          }
+                          return showParks ? Colors.grey : Colors.green;
+                        },
+                      ),
+                    ),
                     child: Text(showParks ? 'Hide Parks' : 'Show Parks'),
                   ),
                   const SizedBox(height: 16),
@@ -300,20 +324,19 @@ class _MapPageState extends State<MapPage> {
                             !showHighNoisePollutionPolygons;
                       });
                     },
+                    style: ButtonStyle(
+                      backgroundColor: MaterialStateProperty.resolveWith<Color>(
+                            (Set<MaterialState> states) {
+                          if (states.contains(MaterialState.disabled)) {
+                            return Colors.grey;
+                          }
+                          return showHighNoisePollutionPolygons ? Colors.grey : Colors.black54;
+                        },
+                      ),
+                    ),
                     child: Text(showHighNoisePollutionPolygons
                         ? 'Hide High Noise Pollution'
                         : 'Show High Noise Pollution'),
-                  ),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () {
-                      setState(() {
-                        showLowPollutionPolygons = !showLowPollutionPolygons;
-                      });
-                    },
-                    child: Text(showLowPollutionPolygons
-                        ? 'Hide Low Noise Pollution'
-                        : 'Show Low Noise Pollution'),
                   ),
                   const SizedBox(height: 16),
                   ElevatedButton(
@@ -323,6 +346,16 @@ class _MapPageState extends State<MapPage> {
                             !showEcoSignificantAreasPolygons;
                       });
                     },
+                    style: ButtonStyle(
+                      backgroundColor: MaterialStateProperty.resolveWith<Color>(
+                            (Set<MaterialState> states) {
+                          if (states.contains(MaterialState.disabled)) {
+                            return Colors.grey;
+                          }
+                          return showEcoSignificantAreasPolygons ? Colors.blue : Colors.lightBlueAccent;
+                        },
+                      ),
+                    ),
                     child: Text(showEcoSignificantAreasPolygons
                         ? 'Hide Eco Significant Areas'
                         : 'Show Eco Significant Areas'),
@@ -335,206 +368,54 @@ class _MapPageState extends State<MapPage> {
     );
   }
 
-  /*
-    @override
-  Widget build(BuildContext context) {
-    final Set<Marker> allMarkers = {...parkMarkers, ...savedMarkers};
-
-    return Scaffold(
-      body: GoogleMap(
-        initialCameraPosition: const CameraPosition(
-          target: LatLng(59.3293, 18.0686),
-          zoom: 12,
-        ),
-        onMapCreated: (controller) {
-          mapController = controller;
-        },
-        markers: showParks ? allMarkers : savedMarkers,
-        polygons: showPolygons ? highNoisePollutionPolygonSet : <Polygon>{},
-      ),
-      floatingActionButton: Stack(
-        children: [
-          Positioned(
-            bottom: 16.0,
-            left: 85.0,
-            child: FloatingActionButton(
-              onPressed: () async {
-                // Get the center coordinates of the map view
-                LatLng center = await mapController.getLatLng(
-                  const ScreenCoordinate(x: 500, y: 500),
-                );
-                createSavedMarker(center);
-              },
-              child: const Icon(Icons.add),
-            ),
-          ),
-          Positioned(
-            bottom: 16.0,
-            left: 20.0,
-            child: FloatingActionButton(
-              onPressed: () {
-                setState(() {
-                  showFilters = !showFilters;
-                });
-              },
-              backgroundColor: Colors.black54,
-              child: const Icon(Icons.filter_list, color: Colors.white), // set the background color
-            ),
-          ),
-          if (showFilters)
-            Positioned(
-              bottom: 100.0,
-              left: 20.0,
-              child: Column(
-                children: [
-                  FloatingActionButton(
-                    onPressed: () {
-                      setState(() {
-                        showParks = !showParks;
-                      });
-                    },
-                    child: Icon(showParks ? Icons.visibility : Icons.visibility_off),
-                  ),
-                  const SizedBox(height: 16),
-                  FloatingActionButton(
-                    onPressed: () {
-                      setState(() {
-                        showPolygons = !showPolygons;
-                      });
-                    },
-                    tooltip: 'Toggle Polygons',
-                    child: Icon(showPolygons ? Icons.visibility : Icons.visibility_off),
-                  ),
-                ],
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-  */
-
-/*
-  @override
-  Widget build(BuildContext context) {
-    final Set<Marker> allMarkers = {...parkMarkers, ...savedMarkers};
-
-    return Scaffold(
-      body: GoogleMap(
-        initialCameraPosition: const CameraPosition(
-          target: LatLng(59.3293, 18.0686),
-          zoom: 12,
-        ),
-        onMapCreated: (controller) {
-          mapController = controller;
-        },
-        markers: showParks ? allMarkers : savedMarkers,
-        polygons: showPolygons ? highNoisePollutionPolygonSet : <Polygon> {},
-      ),
-
-      floatingActionButton: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          FloatingActionButton(
-            onPressed: () {
-              setState(() {
-                showFilters = !showFilters;
-              });
-            },
-            backgroundColor: Colors.black54,
-            child: const Icon(Icons.filter_list, color: Colors.white), // set the background color
-          ),
-          if (showFilters)
-            Column(
-              children: [
-                FloatingActionButton(
-                  onPressed: () {
-                    setState(() {
-                      showParks = !showParks;
-                    });
-                  },
-                  child: Icon(showParks ? Icons.visibility : Icons.visibility_off),
+  createInfoWindow(LatLng newPosition, BuildContext context) {
+    return InfoWindow(
+      title: newPosition.toString(), // Set the new title for the marker
+      onTap: () {
+        // Show a dialog to allow the user to change the marker title
+        showDialog(
+          context: context,
+          builder: (context) {
+            String newTitle = "";
+            return AlertDialog(
+              title: const Text("Change Marker Title"),
+              content: TextField(
+                onChanged: (value) {
+                  newTitle = value;
+                },
+                decoration: const InputDecoration(
+                  hintText: "Enter new title",
                 ),
-                const SizedBox(height: 16),
-                FloatingActionButton(
+              ),
+              actions: <Widget>[
+                TextButton(
+                  child: const Text("Remove"),
                   onPressed: () {
-                    setState(() {
-                      showPolygons = !showPolygons;
-                    });
+                    LocalUser.savedMarkers.removeWhere((marker) => marker.markerId.value == newPosition.toString());
+                    setState(() {});
+                    LocalUser().saveData();
+                    Navigator.of(context).pop();
                   },
-                  tooltip: 'Toggle Polygons',
-                  child: Icon(showPolygons ? Icons.visibility : Icons.visibility_off),
+                ),
+                TextButton(
+                  child: const Text("Cancel"),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+                TextButton(
+                  child: const Text("Save"),
+                  onPressed: () {
+                    changeMarkerTitle(newPosition, newTitle);
+                    Navigator.of(context).pop();
+                  },
                 ),
               ],
-            ),
-        ],
-      ),
+            );
+          },
+        );
+      },
     );
   }
 
-   */
-
-  /*
-  @override
-  Widget build(BuildContext context) {
-    final Set<Marker> allMarkers = {...parkMarkers, ...savedMarkers};
-
-    return Scaffold(
-      body: GoogleMap(
-        initialCameraPosition: const CameraPosition(
-          target: LatLng(59.3293, 18.0686),
-          zoom: 12,
-        ),
-        onMapCreated: (controller) {
-          mapController = controller;
-        },
-        markers: showParks ? allMarkers : savedMarkers,
-        polygons: showPolygons ? highNoisePollutionPolygonSet : <Polygon> {},
-      ),
-
-      floatingActionButton: Stack(children: [
-        Positioned(
-          bottom: 16.0,
-          left: 16.0,
-          child: FloatingActionButton(
-            onPressed: () {
-              setState(() {
-                showParks = !showParks;
-              });
-            },
-            child: Icon(showParks ? Icons.visibility : Icons.visibility_off),
-          ),
-        ),
-        Positioned(
-          bottom: 85.0,
-          left: 16.0,
-          child: FloatingActionButton(
-            onPressed: () async {
-              // Get the center coordinates of the map view
-              LatLng center = await mapController.getLatLng(
-                const ScreenCoordinate(x: 500, y: 500),
-              );
-              createSavedMarker(center);
-            },
-            child: const Icon(Icons.add),
-          ),
-        ),
-        Positioned(
-          bottom: 16,
-          left: 80,
-            child: FloatingActionButton(
-              onPressed: () {
-                setState(() {
-                  showPolygons = !showPolygons;
-                });
-              },
-              tooltip: 'Toggle Polygons',
-              child: Icon(showPolygons ? Icons.visibility : Icons.visibility_off),
-            ),
-          )
-      ]),
-    );
-  }
-
-   */
 }

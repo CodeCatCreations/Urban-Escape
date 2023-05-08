@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/percent_indicator.dart';
-
+import 'package:shared_preferences/shared_preferences.dart';
 import 'achievement_page.dart';
 import 'bar_chart.dart';
 import 'chart_container.dart';
@@ -10,9 +10,9 @@ import 'goal_storage.dart';
 
 class ProgressPage extends StatefulWidget {
   const ProgressPage({Key? key, required this.storage}) : super(key: key);
-
   final GoalStorage storage;
-  
+
+
   @override
   ProgressPageState createState() => ProgressPageState();
 }
@@ -21,7 +21,8 @@ class ProgressPageState extends State<ProgressPage> {
   int minutes = 102;
   int _goal = 110;
   int animateDuration = 1000;
-
+  //ändringar
+  bool shouldShowAchievementPopup = false;
   final _formKey = GlobalKey<FormState>();
 
   @override
@@ -36,15 +37,66 @@ class ProgressPageState extends State<ProgressPage> {
   }
 
   Future<File> _setGoal(int newGoal) {
+    //ändringar
+    if (newGoal != _goal){
+      shouldShowAchievementPopup = true;
+    }
     setState(() {
       _goal = newGoal;
     });
-
     return widget.storage.writeGoal(_goal);
+  }
+
+  //Store the flag
+  Future<void> setAchievementPopupShown(bool value) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('achievement_popup_shown', value);
+  }
+
+  //Retrieve the flag
+  Future<bool> getAchievementPopupShown() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getBool('achievement_popup_shown') ?? false;
+  }
+
+  void showAchievementPopup() {
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Congratulations!'),
+          content: Text('You have passed the achievement.'),
+          actions: [
+            TextButton(
+              child: Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+    // Set the flag to indicate that the popup has been shown
+    setAchievementPopupShown(true);
   }
 
   @override
   Widget build(BuildContext context) {
+    //ändringar
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      // Retrieve the flag value from shared preferences
+      bool achievementPopupShown = await getAchievementPopupShown();
+
+      if (!achievementPopupShown && shouldShowAchievementPopup) {
+        showAchievementPopup();
+        shouldShowAchievementPopup = false; // Reset the variable
+
+        // Set the flag to indicate that the popup has been shown
+        setAchievementPopupShown(true);
+      }
+    });
     double percent = minutes / _goal;
     if (percent > 1.0) percent = 1.0;
     final TextEditingController textEditingController = TextEditingController(text: _goal.toString());

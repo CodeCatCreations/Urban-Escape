@@ -11,20 +11,54 @@ class LocalUser {
     return _singleton;
   }
 
+  bool hasPinned = false;
   LocalUser._internal();
+/*
+  List<Map<String, dynamic>> markersList = savedMarkers.map((marker) {
+    return {
+      'markerId': marker.markerId.value,
+      'latitude': marker.position.latitude,
+      'longitude': marker.position.longitude,
+    };
+  }).toList();
+  */
 
 
-  static final Set<Marker> savedMarkers = {};
+  static Set<Marker> savedMarkers = {};
+  // We declare the variable to be static so that it belongs to the class and not to any instance of it.
+  static const lastStopwatchTimeKey = 'last_stopwatch_time';
 
 
   final blueIcon = BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue);
-  final List<DateTime> _streakDates = []; // a list to store the dates of the user's streaks
+  final List<DateTime> _streakDates = []; // a list to store the dates of the user's streaks.... Varför inte STATIC?????
 
+  // This function loads the last saved stopwatch time from shared preferences.
+  // It returns a Future<int>, which means that it will be completed with an integer value in the future.
+  // We mark it as async because it makes use of the SharedPreferences plugin, which is asynchronous.
+  static Future<int> loadStopwatchTime() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getInt(lastStopwatchTimeKey) ?? 0; // Return the saved time, or 0 if it's not present.
+  }
+
+
+  bool hasGoal = false;
+
+  static Future<void> saveStopwatchTime(int time) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(lastStopwatchTimeKey, time); //Save the current stopwatch time to shared preferences.
+  }
 
   // a method to add a date to the user's streak
+  /*
+  List<Map<String, dynamic>> getMarkersList(){
+    return markersList;
+  }
+  */
+
   void addStreakDate(DateTime date) {
     _streakDates.add(date);
   }
+
   // a method to get the user's current streak
   int getCurrentStreak() {
     int streak = 0;
@@ -35,22 +69,36 @@ class LocalUser {
     return streak;
   }
 
-  Future<bool> goalAdded() async {
-    GoalStorage goalStorage = GoalStorage();
-    if (await goalStorage.readGoal() == 0){
-      return false;
-    }
-    return true;
+  void setGoal(){
+    hasGoal = true;
+    SharedPreferences.getInstance().then((prefs) {
+      prefs.setBool('has_goal', hasGoal);
+    });
   }
 
-
+  bool goalAdded() {
+    /*GoalStorage goalStorage = GoalStorage();
+    Future<int> storedGoal = goalStorage.readGoal();
+    storedGoal.then((value) => print('Stored goal: $value'));
+    return storedGoal == 30;
+  */
+  return hasGoal;
+  }
 
   // a method to save the user's streak data to local storage
   Future <void> saveData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-
     saveDates(prefs);
     saveMarkers(prefs);
+
+    hasPinned = true;
+    prefs.setBool('has_goal', hasGoal);
+  }
+
+  bool getPinStatus(){
+    return hasPinned;
+
+    //saveElapsedTime(prefs);
 
   }
 
@@ -65,6 +113,7 @@ class LocalUser {
         'markerId': marker.markerId.value,
         'latitude': marker.position.latitude,
         'longitude': marker.position.longitude,
+        'infoWindowTitle' : marker.infoWindow.title
       };
     }).toList();
 
@@ -72,15 +121,26 @@ class LocalUser {
     await prefs.setString('saved_markers', markersJson);
   }
 
-
+/*
+  List<Map<String, dynamic>> getMarkerList(){
+    return markersList;
+  }
+  */
 
   // a method to load the user's streak data from local storage
   Future<void> loadData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
+    loadDates(prefs);
+    loadMarkers(prefs);
+  }
+
+  void loadDates(SharedPreferences prefs) {
     List<String> dates = prefs.getStringList('streak_dates') ?? [];
     _streakDates.clear();
     _streakDates.addAll(dates.map((date) => DateTime.parse(date)));
+  }
 
+  void loadMarkers(SharedPreferences prefs) {
     String markersJson = prefs.getString('saved_markers') ?? '[]';
     List<Map<String, dynamic>> markersList = List<Map<String, dynamic>>.from(json.decode(markersJson));
     savedMarkers.clear();
@@ -90,10 +150,14 @@ class LocalUser {
         position: LatLng(markerData['latitude'], markerData['longitude']),
         draggable: false,
         icon: blueIcon,
+        infoWindow: InfoWindow( // Create the info window with the saved title
+          title: markerData['infoWindowTitle']
+        ),
       );
       savedMarkers.add(marker);
     }
 
-  }
+    hasGoal = prefs.getBool('has_goal') ?? false;
 
+  }
 }
