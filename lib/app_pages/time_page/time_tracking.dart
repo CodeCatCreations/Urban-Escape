@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/percent_indicator.dart';
+import 'package:provider/provider.dart';
 import 'dart:async';
 import 'package:urban_escape_application/database/local_user.dart';
+
+import '../../database/time_data.dart';
 
 class TimeTrackingPage extends StatefulWidget {
   const TimeTrackingPage({super.key});
@@ -13,7 +16,7 @@ class TimeTrackingPage extends StatefulWidget {
 class _TimeTrackingPageState extends State<TimeTrackingPage> {
   int _passedTime = 0;
   double _percent = 0.0;
-  int goal = 10;
+  int _goal = 10;
   Timer _timer = Timer(Duration.zero, () {});
   bool click = true;
 
@@ -25,7 +28,15 @@ class _TimeTrackingPageState extends State<TimeTrackingPage> {
     setState(() {
       _passedTime = lastTimeUserStoppedTheTime;
     
-      _percent = getPercent();
+      reloadPercent();
+    });
+  }
+
+  Future<void> loadCurrentGoal() async {
+    final currentWeeklyGoal = await LocalUser.loadWeeklyGoal();
+
+    setState(() {
+      _goal = 60 * currentWeeklyGoal ~/ 7;
     });
   }
 
@@ -33,18 +44,34 @@ class _TimeTrackingPageState extends State<TimeTrackingPage> {
     await LocalUser.saveStopwatchTime(time);
   }
 
+  void reloadPercent() {
+    _percent = getPercent();
+  }
+
   double getPercent() {
     // Calculate the percentage of the goal that has been reached based on the passed time.
     // If the passed time is greater than the goal, set the percentage to 1.0 (or 100%).
     // Otherwise, set the percentage to the ratio of the passed time to the goal.
-    return Duration(seconds: _passedTime).inSeconds.toDouble() > (goal * 100)
+    loadCurrentGoal();
+    return Duration(seconds: _passedTime).inSeconds.toDouble() > (_goal * 100)
             ? 1
-            : Duration(seconds: _passedTime).inSeconds.toDouble() / (goal * 100);
+            : Duration(seconds: _passedTime).inSeconds.toDouble() / (_goal * 100);
+  }
+
+  void loadLastDayAppOpened() async {
+    String lastDayAppOpened = await LocalUser.lastDayAppWasOpened();
+    if (lastDayAppOpened != DateTime.now().day.toString()) {
+      if (DateTime.now().day == DateTime.monday) {
+        LocalUser.resetRecordedTimeWeekday();
+      }
+    } 
   }
 
   @override
   void initState() {
     super.initState();
+    loadLastDayAppOpened();
+    
     loadLastStopwatchTime();
   }
 
@@ -55,6 +82,7 @@ class _TimeTrackingPageState extends State<TimeTrackingPage> {
         _passedTime++;
         _percent = getPercent();
       });
+      Provider.of<TimeData>(context, listen:false).updateStopTimerMS(_passedTime);
     });
   }
 
@@ -100,54 +128,60 @@ class _TimeTrackingPageState extends State<TimeTrackingPage> {
             ),
           ),
           const SizedBox(height: 20),
-          CircularPercentIndicator(
-            radius: 180,
-            lineWidth: 20.0,
-            backgroundWidth: 15,
-            animation: true,
-            animationDuration: 10,
-            animateFromLastPercent: true,
-            percent: _percent,
-            circularStrokeCap: CircularStrokeCap.round,
-            progressColor:
-                _percent == 1.0 ? Colors.green.shade300 : Colors.blue.shade300,
-            backgroundColor: Colors.white54,
-            center: Container(
-              alignment: Alignment.bottomCenter,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Text(
-                    timerText,
-                    style: const TextStyle(
-                      fontSize: 50.0,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                  Text(
-                    "Daily progress: " + (_percent*100).toInt().toString()+"%",
-                    style: const TextStyle(
-                      fontSize: 20.0,
-                      color: Colors.white,
-                    ),
-                  ),
-                  IconButton(
-                    alignment: Alignment.bottomCenter,
-                    iconSize: 100,
-                    onPressed: () {
-                      setState(() {
-                        click = !click;
-                        (click == false) ? startTimer() : stopTimer();
-                      });
-                    },
-                    icon: Icon((click == false) ? Icons.pause_circle_filled :
-                    Icons.play_circle_filled, color: Colors.grey.shade50),
-                  ),
-                ],
-              )
-            )
+          Consumer<TimeData>(
+            builder: (context, myData, child) {
+              reloadPercent();
+              return CircularPercentIndicator(
+                radius: 180,
+                lineWidth: 20.0,
+                backgroundWidth: 15,
+                animation: true,
+                animationDuration: 10,
+                animateFromLastPercent: true,
+                percent: _percent,
+                circularStrokeCap: CircularStrokeCap.round,
+                progressColor:
+                    _percent == 1.0 ? Colors.green.shade300 : Colors.blue.shade300,
+                backgroundColor: Colors.white54,
+                center: Container(
+                  alignment: Alignment.bottomCenter,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Text(
+                        timerText,
+                        style: const TextStyle(
+                          fontSize: 50.0,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                      Text(
+                        "Daily progress: " + (_percent*100).toInt().toString()+"%",
+                        style: const TextStyle(
+                          fontSize: 20.0,
+                          color: Colors.white,
+                        ),
+                      ),
+                      IconButton(
+                        alignment: Alignment.bottomCenter,
+                        iconSize: 100,
+                        onPressed: () {
+                          setState(() {
+                            click = !click;
+                            (click == false) ? startTimer() : stopTimer();
+                          });
+                        },
+                        icon: Icon((click == false) ? Icons.pause_circle_filled :
+                        Icons.play_circle_filled, color: Colors.grey.shade50),
+                      ),
+                    ],
+                  )
+                )
+              );
+            }
           ),
+          
           const SizedBox(height: 20),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,

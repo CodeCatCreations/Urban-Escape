@@ -33,6 +33,27 @@ class LocalUser {
   static Future<void> saveStopwatchTime(int time) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt(lastStopwatchTimeKey, time); //Save the current stopwatch time to shared preferences.
+    await prefs.setInt("time_spent_day_${DateTime.now().weekday}", time);
+  }
+
+  static Future<int> loadRecordedTimeWeekday(int weekDay) async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getInt("time_spent_day_$weekDay") ?? 0; // Return the recorded time for the specified weekday, or 0 if there is none.
+  }
+
+  static Future<void> resetRecordedTimeWeekday() async {
+    final prefs = await SharedPreferences.getInstance();
+    for (int i = 1; i <= 7; i++) {
+      await prefs.setInt("time_spent_day_$i", 0); // Sets the recorded time for all days of the week to 0.
+    }
+  }
+
+
+  static Future<String> lastDayAppWasOpened() async {
+    final prefs = await SharedPreferences.getInstance();
+    String s = prefs.getString('last_opened_day') ?? ''; // Saves the last day the app was opened in a temporary string s.
+    await prefs.setString('last_opened_day', DateTime.now().day.toString()); // Sets the value of last_opened_day to today.
+    return s; // Return the day the app was opened last, or '' if it has not been opened before.
   }
 
   /// This function loads the current weekly goal from shared preferences

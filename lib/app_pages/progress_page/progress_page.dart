@@ -2,6 +2,8 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/percent_indicator.dart';
+import 'package:provider/provider.dart';
+import 'package:urban_escape_application/database/time_data.dart';
 
 import '../../database/local_user.dart';
 import 'achievement_page.dart';
@@ -28,25 +30,17 @@ class ProgressPageState extends State<ProgressPage> {
     loadWeeklyGoal();
   }
 
-  Future<void> loadWeeklyGoal() async {
+  void loadWeeklyGoal() async {
 
-    final currentGoal = await LocalUser.loadWeeklyGoal();
-
-    // In setState we set the state of the widget with the loaded stopwatch time and the percent of the goal achieved
-    setState(() {
-      if (currentGoal == 0) {
-        _saveNewWeeklyGoal(_goal);
-      } else {
-        _goal = currentGoal;
-      }
-    });
+    _goal = await Provider.of<TimeData>(context, listen:false).loadWeeklyGoal();
   }
 
-  void _saveNewWeeklyGoal(int newGoal) async {
+  void _saveNewWeeklyGoal(int newGoal) {
+
     setState(() {
+      Provider.of<TimeData>(context, listen:false).saveNewWeeklyGoal(newGoal);
       _goal = newGoal;
     });
-    await LocalUser.saveWeeklyGoal(newGoal);
   }
 
   @override
