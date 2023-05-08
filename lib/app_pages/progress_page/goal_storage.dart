@@ -6,6 +6,7 @@ import 'package:path_provider/path_provider.dart';
 import '../../database/local_user.dart';
 
 class GoalStorage {
+
   Future<String> get _localPath async {
     final directory = await getApplicationDocumentsDirectory();
 

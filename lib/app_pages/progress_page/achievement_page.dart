@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:urban_escape_application/app_pages/progress_page/achievement.dart';
 import 'package:urban_escape_application/database/local_user.dart';
@@ -24,6 +22,7 @@ class AchievementPage extends StatelessWidget {
       print("Success");
       natureLoverAchievement.incrementLevel();
     }
+
 
     /*if(_localUser.getMarkerList().isNotEmpty){
       log(_localUser.markersList.length);
