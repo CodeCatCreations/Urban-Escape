@@ -3,6 +3,7 @@ import 'package:percent_indicator/percent_indicator.dart';
 import 'package:provider/provider.dart';
 import 'package:urban_escape_application/database/time_data.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:urban_escape_application/app_pages/progress_page/daily_banner_page.dart';
 import '../../database/local_user.dart';
 import 'achievement_page.dart';
 import 'bar_chart.dart';
@@ -72,26 +73,8 @@ class ProgressPageState extends State<ProgressPage> {
     return prefs.getBool('achievement_popup_shown') ?? false;
   }
 
-  void showAchievementPopup() {
-
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Congratulations!'),
-          content: Text('You have passed the achievement.'),
-          actions: [
-            TextButton(
-              child: Text('OK'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-    // Set the flag to indicate that the popup has been shown
+  void showAchievementPopup(BuildContext context) async {
+    ProgressBannerBar.show(context, 'Congrats! You have just passed an achievement!');
     setAchievementPopupShown(true);
   }
 
@@ -103,7 +86,7 @@ class ProgressPageState extends State<ProgressPage> {
       bool achievementPopupShown = await getAchievementPopupShown();
 
       if (!achievementPopupShown && shouldShowAchievementPopup) {
-        showAchievementPopup();
+        showAchievementPopup(context);
         shouldShowAchievementPopup = false; // Reset the variable
 
         // Set the flag to indicate that the popup has been shown
