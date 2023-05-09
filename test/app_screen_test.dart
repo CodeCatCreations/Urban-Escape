@@ -6,7 +6,7 @@ import 'package:urban_escape_application/app_pages/sounds_page.dart';
 import 'package:urban_escape_application/app_pages/time_page/time_tracking.dart';
 import 'package:urban_escape_application/app_pages/progress_page/progress_page.dart';
 
-
+// Todo: pixel overflow from progress page to pass these tests
 void main() {
   group('AppScreen Widget Tests', () {
     testWidgets('AppScreen Widget renders correctly', (WidgetTester tester) async {

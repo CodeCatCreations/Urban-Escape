@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:urban_escape_application/app_front_page/app_center_page.dart';
 import 'package:urban_escape_application/app_pages/settings_page.dart';
 import '../app_pages/progress_page/progress_page.dart';
 import '../app_pages/time_page/time_tracking.dart';
@@ -26,7 +25,6 @@ class _AppScreenState extends State<AppScreen> {
     const MapPage(),
     const SoundsPage(),
     const TimeTrackingPage(),
-    const AppCenterPage(),
   ];
 
   void _tappedItem(int index) {
