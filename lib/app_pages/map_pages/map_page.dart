@@ -2,6 +2,7 @@ import 'dart:collection';
 
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:urban_escape_application/app_pages/progress_page/daily_banner_page.dart';
 import 'package:urban_escape_application/database/maria_sql.dart';
 import 'package:urban_escape_application/database//local_user.dart';
 
@@ -94,8 +95,8 @@ class _MapPageState extends State<MapPage> {
       final polygon = Polygon(
         polygonId: PolygonId(id.toString()),
         points: polygonPoints,
-        fillColor: Colors.red,
-        strokeColor: Colors.blue,
+        fillColor: Colors.red.shade700,
+        strokeColor: Colors.red.shade400,
         strokeWidth: 4,
         geodesic: true,
       );
@@ -132,7 +133,6 @@ class _MapPageState extends State<MapPage> {
     LocalUser().loadData();
     fetchParksData();
     fetchEcoSignificantAreasPolygons();
-    fetchLowNoisePollutionPolygonPoints();
     fetchHighNoisePollutionPolygonPoints();
   }
 
@@ -193,6 +193,16 @@ class _MapPageState extends State<MapPage> {
 
       setState(() {});
       LocalUser().saveData();
+  }
+
+    void showAchievementPopup(BuildContext context) async {
+    bool achievementPopupShown = await LocalUser.getSaveAMarkerAchievementPopupShown();
+    if (!achievementPopupShown) {
+      // ignore: use_build_context_synchronously
+      ProgressBannerBar.show(
+          context, 'Congrats! You have just passed an achievement!');
+    }
+    LocalUser.setSaveAMarkerAchievementPopupShown(true);
   }
 
   @override
@@ -408,6 +418,7 @@ class _MapPageState extends State<MapPage> {
                   onPressed: () {
                     changeMarkerTitle(newPosition, newTitle);
                     Navigator.of(context).pop();
+                    showAchievementPopup(context);
                   },
                 ),
               ],

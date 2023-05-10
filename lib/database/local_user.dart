@@ -6,22 +6,13 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 class LocalUser {
 
   static final LocalUser _singleton = LocalUser._internal();
+
   factory LocalUser() {
     return _singleton;
   }
 
   bool hasPinned = false;
   LocalUser._internal();
-/*
-  List<Map<String, dynamic>> markersList = savedMarkers.map((marker) {
-    return {
-      'markerId': marker.markerId.value,
-      'latitude': marker.position.latitude,
-      'longitude': marker.position.longitude,
-    };
-  }).toList();
-  */
-
 
   static Set<Marker> savedMarkers = {};
   // We declare the variable to be static so that it belongs to the class and not to any instance of it.
@@ -39,7 +30,6 @@ class LocalUser {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getInt(lastStopwatchTimeKey) ?? 0; // Return the saved time, or 0 if it's not present.
   }
-
 
   bool hasGoal = false;
 
@@ -79,13 +69,6 @@ class LocalUser {
     await prefs.setInt(weeklyGoalKey, goal); //Save the new weekly goal to shared preferences.
   }
 
-  // a method to add a date to the user's streak
-  /*
-  List<Map<String, dynamic>> getMarkersList(){
-    return markersList;
-  }
-  */
-
   void addStreakDate(DateTime date) {
     _streakDates.add(date);
   }
@@ -108,11 +91,6 @@ class LocalUser {
   }
 
   bool goalAdded() {
-    /*GoalStorage goalStorage = GoalStorage();
-    Future<int> storedGoal = goalStorage.readGoal();
-    storedGoal.then((value) => print('Stored goal: $value'));
-    return storedGoal == 30;
-  */
   return hasGoal;
   }
 
@@ -128,9 +106,6 @@ class LocalUser {
 
   bool getPinStatus(){
     return hasPinned;
-
-    //saveElapsedTime(prefs);
-
   }
 
   void saveDates(SharedPreferences prefs) async {
@@ -151,12 +126,6 @@ class LocalUser {
     String markersJson = json.encode(markersList);
     await prefs.setString('saved_markers', markersJson);
   }
-
-/*
-  List<Map<String, dynamic>> getMarkerList(){
-    return markersList;
-  }
-  */
 
   // a method to load the user's streak data from local storage
   Future<void> loadData() async {
@@ -191,4 +160,52 @@ class LocalUser {
     hasGoal = prefs.getBool('has_goal') ?? false;
 
   }
+
+static bool goalAchievementPopUpHasBeenShown = false;
+
+static Future<void> setGoalAchievementPopupShown(bool value) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    goalAchievementPopUpHasBeenShown = true;
+    await prefs.setBool('goal_pop_up_shown', value);
+  }
+
+ static Future<bool> getGoalAchievementPopupShown() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getBool('goal_pop_up_shown') ?? false;
+  }
+
+static bool timerAchievementPopupShown = false;
+
+static Future<void> setTimerAchievementPopupShown(bool value) async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  timerAchievementPopupShown = true;
+  await prefs.setBool('timer_pop_up_shown', value);
+}
+
+static Future<bool> getTimerAchievementPopupShown() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  return prefs.getBool('timer_pop_up_shown') ?? false;
+}
+
+static bool saveAMarkerAchievementPopupShown = false;
+
+static Future<void> setSaveAMarkerAchievementPopupShown(bool value) async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  saveAMarkerAchievementPopupShown = true;
+  await prefs.setBool('save_marker_pop_up_shown', value);
+}
+
+static Future<bool> getSaveAMarkerAchievementPopupShown() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  return prefs.getBool('save_marker_pop_up_shown') ?? false;
+}
+
+
+
+
+/*
+  bool getSetTimeAchievementStatus() {}
+
+  bool getSaveMarkerAchievementStatus() {}
+  */
 }
