@@ -1,54 +1,62 @@
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
 
-
 class SoundsPage extends StatelessWidget {
   const SoundsPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: GridView.count(
-        crossAxisCount: 2,
-        childAspectRatio: 1.1,
-        children: [
-          SoundWidget(
-            imageFilePath: 'assets/icons/rainy.png',
-            activatedColor: Colors.green,
-            deactivatedColor: Colors.grey,
-            soundFileSource: AssetSource('sounds/Rain.mp3'), // Rain
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Colors.blue, Colors.white],
           ),
-          SoundWidget(
-            imageFilePath: 'assets/icons/thunder.png',
-            activatedColor: Colors.green,
-            deactivatedColor: Colors.grey,
-            soundFileSource: AssetSource('sounds/Thunder.mp3'), // Thunder
-          ),
-          SoundWidget(
-            imageFilePath: 'assets/icons/wind.png',
-            activatedColor: Colors.green,
-            deactivatedColor: Colors.grey,
-            soundFileSource: AssetSource('sounds/Wind.mp3'), // Wind
-          ),
-          SoundWidget(
-            imageFilePath: 'assets/icons/wave.png',
-            activatedColor: Colors.green,
-            deactivatedColor: Colors.grey,
-            soundFileSource: AssetSource('sounds/Waves.mp3'), // Waves
-          ),
-          SoundWidget(
-            imageFilePath: 'assets/icons/bird.png',
-            activatedColor: Colors.green,
-            deactivatedColor: Colors.grey,
-            soundFileSource: AssetSource('sounds/Birds.mp3'), // Birds
-          ),
-          SoundWidget(
-            imageFilePath: 'assets/icons/campfire.png',
-            activatedColor: Colors.green,
-            deactivatedColor: Colors.grey,
-            soundFileSource: AssetSource('sounds/Campfire.mp3'), // Campfire
-          ),
-        ],
+        ),
+        child: GridView.count(
+          crossAxisCount: 2,
+          childAspectRatio: 1.1,
+          children: [
+            SoundWidget(
+              imageFilePath: 'assets/icons/rainy.png',
+              activatedColor: Colors.black54,
+              deactivatedColor: Colors.white70,
+              soundFileSource: AssetSource('sounds/Rain.mp3'), // Rain
+            ),
+            SoundWidget(
+              imageFilePath: 'assets/icons/thunder.png',
+              activatedColor: Colors.black54,
+              deactivatedColor: Colors.white70,
+              soundFileSource: AssetSource('sounds/Thunder.mp3'), // Thunder
+            ),
+            SoundWidget(
+              imageFilePath: 'assets/icons/wind.png',
+              activatedColor: Colors.black54,
+              deactivatedColor: Colors.white70,
+              soundFileSource: AssetSource('sounds/Wind.mp3'), // Wind
+            ),
+            SoundWidget(
+              imageFilePath: 'assets/icons/wave.png',
+              activatedColor: Colors.black54,
+              deactivatedColor: Colors.white70,
+              soundFileSource: AssetSource('sounds/Waves.mp3'), // Waves
+            ),
+            SoundWidget(
+              imageFilePath: 'assets/icons/bird.png',
+              activatedColor: Colors.black54,
+              deactivatedColor: Colors.white70,
+              soundFileSource: AssetSource('sounds/Birds.mp3'), // Birds
+            ),
+            SoundWidget(
+              imageFilePath: 'assets/icons/campfire.png',
+              activatedColor: Colors.black54,
+              deactivatedColor: Colors.white70,
+              soundFileSource: AssetSource('sounds/Campfire.mp3'), // Campfire
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -94,8 +102,12 @@ class _SoundWidgetState extends State<SoundWidget> {
             padding: const EdgeInsets.all(0),
             iconSize: 100,
             icon: (_isActivated
-                ? Image(image: AssetImage(widget.imageFilePath), color: widget.activatedColor)
-                : Image(image: AssetImage(widget.imageFilePath), color: widget.deactivatedColor)),
+                ? Image(
+                    image: AssetImage(widget.imageFilePath),
+                    color: widget.activatedColor)
+                : Image(
+                    image: AssetImage(widget.imageFilePath),
+                    color: widget.deactivatedColor)),
             onPressed: _toggleSound,
           ),
         ),
@@ -125,7 +137,6 @@ class _SoundWidgetState extends State<SoundWidget> {
     await _audioPlayer.play(widget.soundFileSource);
   }
 
-
   void _stopSound() {
     _audioPlayer.stop();
   }
@@ -143,7 +154,6 @@ class _SoundWidgetState extends State<SoundWidget> {
     super.dispose();
   }
 }
-
 
 class VolumeSlider extends StatelessWidget {
   final double value;

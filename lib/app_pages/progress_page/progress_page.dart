@@ -1,25 +1,25 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/percent_indicator.dart';
+import 'package:provider/provider.dart';
+import 'package:urban_escape_application/database/time_data.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:urban_escape_application/app_pages/progress_page/daily_banner_page.dart';
+import '../../database/local_user.dart';
 import 'achievement_page.dart';
 import 'bar_chart.dart';
 import 'chart_container.dart';
-import 'goal_storage.dart';
 
 class ProgressPage extends StatefulWidget {
-  const ProgressPage({Key? key, required this.storage}) : super(key: key);
-  final GoalStorage storage;
-
-
+  const ProgressPage({Key? key}) : super(key: key);
+  
   @override
   ProgressPageState createState() => ProgressPageState();
 }
 
 class ProgressPageState extends State<ProgressPage> {
-  int minutes = 102;
-  int _goal = 110;
+  int seconds = 102;
+  int _goal = 0;
+  double _percent = 0.0;
   int animateDuration = 1000;
   //ändringar
   bool shouldShowAchievementPopup = false;
@@ -28,23 +28,37 @@ class ProgressPageState extends State<ProgressPage> {
   @override
   void initState() {
     super.initState();
-    widget.storage.readGoal().then((value) {
-      setState(() {
-        _goal = value;
-        if (_goal == 0) _goal = 1;
-      });
+    loadWeeklyGoal();
+  }
+
+  void loadWeeklyGoal() async {
+    final goal = await Provider.of<TimeData>(context, listen:false).loadWeeklyGoal();
+    setState(() {
+      _goal = goal;
     });
   }
 
-  Future<File> _setGoal(int newGoal) {
-    //ändringar
+  void _saveNewWeeklyGoal(int newGoal) {
     if (newGoal != _goal){
       shouldShowAchievementPopup = true;
     }
     setState(() {
+      Provider.of<TimeData>(context, listen:false).saveNewWeeklyGoal(newGoal);
       _goal = newGoal;
     });
-    return widget.storage.writeGoal(_goal);
+  }
+
+  Future<void> setPercent() async {
+    _percent = seconds / (_goal * 60);
+    if (_percent > 1.0) _percent = 1.0;
+  }
+
+  Future<void> getWeeklyProgress() async {
+    int totalTimeMS = 0;
+    for (int i = 1; i <= 7; i++) {
+      totalTimeMS += await LocalUser().loadRecordedTimeWeekday(i);
+    }
+    seconds = totalTimeMS ~/ 100;
   }
 
   //Store the flag
@@ -59,26 +73,8 @@ class ProgressPageState extends State<ProgressPage> {
     return prefs.getBool('achievement_popup_shown') ?? false;
   }
 
-  void showAchievementPopup() {
-
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Congratulations!'),
-          content: Text('You have passed the achievement.'),
-          actions: [
-            TextButton(
-              child: Text('OK'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-    // Set the flag to indicate that the popup has been shown
+  void showAchievementPopup(BuildContext context) async {
+    ProgressBannerBar.show(context, 'Congrats! You have just passed an achievement!');
     setAchievementPopupShown(true);
   }
 
@@ -90,15 +86,14 @@ class ProgressPageState extends State<ProgressPage> {
       bool achievementPopupShown = await getAchievementPopupShown();
 
       if (!achievementPopupShown && shouldShowAchievementPopup) {
-        showAchievementPopup();
+        showAchievementPopup(context);
         shouldShowAchievementPopup = false; // Reset the variable
 
         // Set the flag to indicate that the popup has been shown
         setAchievementPopupShown(true);
       }
     });
-    double percent = minutes / _goal;
-    if (percent > 1.0) percent = 1.0;
+    
     final TextEditingController textEditingController = TextEditingController(text: _goal.toString());
     final PageController pageController = PageController();
 
@@ -175,7 +170,7 @@ class ProgressPageState extends State<ProgressPage> {
                                                 onPressed: () {
                                                   if (_formKey.currentState!.validate()) {
                                                     _formKey.currentState!.save();
-                                                    _setGoal(int.parse(textEditingController.text));
+                                                    _saveNewWeeklyGoal(int.parse(textEditingController.text));
                                                     Navigator.of(context).pop();
                                                   }
                                                 },
@@ -217,26 +212,44 @@ class ProgressPageState extends State<ProgressPage> {
                         'Weekly Progress', textScaleFactor: 1.4,
                       ),
                     ),
-                    Padding(
+                    Consumer<TimeData>(builder: (context, myData, child) {
+                        
+                      return FutureBuilder(
+                        future: setPercent(),
+                        builder: (BuildContext context, AsyncSnapshot snapshot) {
+                          return Padding(
                       padding: const EdgeInsets.all(5.0),
                       child: LinearPercentIndicator(
                         width: MediaQuery.of(context).size.width - 50.0,
                         animation: true,
                         animationDuration: animateDuration,
+                        animateFromLastPercent: true,
                         lineHeight: 25.0,
-                        percent: percent,
-                        center: Text('${(percent * 100).toStringAsFixed(0)}%', textScaleFactor: 1.2),
+                        percent: _percent,
+                        center: Text('${(_percent * 100).toStringAsFixed(0)}%', textScaleFactor: 1.2),
                         progressColor: Colors.green,
                       ),
-                    ),
+                    
+                    );
+                    }); 
+                    }),
                     Center(
-                      child: Text(
-                        '$minutes / $_goal minutes', textScaleFactor: 1.2,
-                      ),
+                      child: Consumer<TimeData>(builder: (context, myData, child) {
+                        
+                      return FutureBuilder(
+                        future: getWeeklyProgress(),
+                        builder: (BuildContext context, AsyncSnapshot snapshot) {
+                          return Text(
+                            '${seconds ~/ 60} / $_goal minutes', textScaleFactor: 1.2,
+                          );
+                        },
+                      );
+                      }),
+                      
                     ),
-                    ChartContainer(
+                    const ChartContainer(
                       title: 'Daily goal',
-                      color: const Color.fromARGB(255, 41, 128, 38),
+                      color: Color.fromARGB(255, 41, 128, 38),
                       chart: BarChartContent(),
                     ),
                   ],

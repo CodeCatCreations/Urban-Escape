@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:urban_escape_application/app_pages/progress_page/goal_storage.dart';
 
 
 class LocalUser {
@@ -27,6 +26,7 @@ class LocalUser {
   static Set<Marker> savedMarkers = {};
   // We declare the variable to be static so that it belongs to the class and not to any instance of it.
   static const lastStopwatchTimeKey = 'last_stopwatch_time';
+  static const weeklyGoalKey = 'weekly_goal';
 
 
   final blueIcon = BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue);
@@ -43,9 +43,40 @@ class LocalUser {
 
   bool hasGoal = false;
 
-  static Future<void> saveStopwatchTime(int time) async {
+  static Future<void> saveStopwatchTime(int timeInMS) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt(lastStopwatchTimeKey, time); //Save the current stopwatch time to shared preferences.
+    await prefs.setInt(lastStopwatchTimeKey, timeInMS); //Save the current stopwatch time to shared preferences.
+    await prefs.setInt("time_spent_day_${DateTime.now().weekday}", timeInMS);
+  }
+
+  Future<int> loadRecordedTimeWeekday(int weekDay) async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getInt("time_spent_day_$weekDay") ?? 0; // Return the recorded time for the specified weekday, or 0 if there is none.
+  }
+
+  static Future<void> resetRecordedTimeWeekday() async {
+    final prefs = await SharedPreferences.getInstance();
+    for (int i = 1; i <= 7; i++) {
+      await prefs.setInt("time_spent_day_$i", 0); // Sets the recorded time for all days of the week to 0.
+    }
+  }
+
+  static Future<String> lastDayAppWasOpened() async {
+    final prefs = await SharedPreferences.getInstance();
+    String s = prefs.getString('last_opened_day') ?? ''; // Saves the last day the app was opened in a temporary string s.
+    await prefs.setString('last_opened_day', DateTime.now().day.toString()); // Sets the value of last_opened_day to today.
+    return s; // Return the day the app was opened last, or '' if it has not been opened before.
+  }
+
+  /// This function loads the current weekly goal from shared preferences
+  static Future<int> loadWeeklyGoal() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getInt(weeklyGoalKey) ?? 0; // Return the current goal, or 0 if it's not present.
+  }
+
+  static Future<void> saveWeeklyGoal(int goal) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(weeklyGoalKey, goal); //Save the new weekly goal to shared preferences.
   }
 
   // a method to add a date to the user's streak
