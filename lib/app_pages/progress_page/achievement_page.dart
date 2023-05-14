@@ -12,7 +12,7 @@ class AchievementPage extends StatefulWidget {
 class _AchievementPageState extends State<AchievementPage> {
   final Achievement goalAchievement = Achievement(
       title: "Goal-oriented",
-      description: "Set a goal",
+      description: "To complete this achievement: \n\nGo to the Progress Page: Click on the 'Set Goal' and set a goal!",
       maxLevel: 1,
       icon: const Icon(Icons.flag, color: Colors.green));
 
@@ -37,12 +37,15 @@ class _AchievementPageState extends State<AchievementPage> {
  
     if (LocalUser.goalAchievementPopUpHasBeenShown) {
       goalAchievement.incrementLevel();
+      goalAchievement.changeDescription("Congragulations! \n\nYou've earned this achievement because you've set a goal");
     }
     if (LocalUser.timerAchievementPopupShown) {
       timeTrackerAchievement.incrementLevel();
+      timeTrackerAchievement.changeDescription("Congragulations! \n\nYou've earned this achievement because you used the stopwatch!");
     }
     if (LocalUser.soundsAchievementPopupShown) {
       soundsAchievement.incrementLevel();
+      soundsAchievement.changeDescription("Congragulations! \n\nYou've earned this achievement because you listened to the waves!");
     }
 
     return Scaffold(

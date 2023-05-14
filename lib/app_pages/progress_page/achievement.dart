@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class Achievement extends GestureDetector {
   final String title;
   double percent = 0.0;
-  final String description;
+  String description;
   final int maxLevel;
   int level = 0;
   Icon icon;
@@ -32,6 +32,11 @@ class Achievement extends GestureDetector {
       icon = updatedIcon;
     }
   }
+
+  void changeDescription(String newDescription) {
+    description = newDescription;
+  }
+  
   @override
   Widget build(BuildContext context) {
     if (passed) {

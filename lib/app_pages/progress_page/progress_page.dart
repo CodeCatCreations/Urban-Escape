@@ -132,7 +132,7 @@ class ProgressPageState extends State<ProgressPage> {
                           TextButton.icon(
                             icon: const Icon(Icons.flag, size: 35, color: Colors.black,),
                             label: const Text(
-                              'Set Goals',
+                              'Set Goal',
                               textScaleFactor: 1.2,
                               style: TextStyle(
                                 color: Colors.black,
