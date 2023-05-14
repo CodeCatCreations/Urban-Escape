@@ -20,7 +20,7 @@ class ChartContainer extends StatelessWidget {
         height: MediaQuery.of(context).size.height * 0.55,
         padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
         decoration: BoxDecoration(
-          color: color,
+          color: Colors.black26,
           borderRadius: BorderRadius.circular(20),
         ),
         child: Column(

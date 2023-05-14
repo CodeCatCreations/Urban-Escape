@@ -17,7 +17,7 @@ class Achievement extends GestureDetector {
     required this.icon,
   }) : super(key: key);
 
-  void incrementLevel() async {
+  void incrementLevel() {
     if (level < maxLevel) {
       passed = true;
       level++;
@@ -38,7 +38,7 @@ class Achievement extends GestureDetector {
       return GestureDetector(
         onTap: () => _showAchievementDetails(context, title, description),
         child: Card(
-          color: Colors.green[100],
+          color: Colors.green[300],
           child: ListTile(
             leading: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -110,7 +110,8 @@ class Achievement extends GestureDetector {
                       ),
                     ),
                     const SizedBox(width: 8.0),
-                    Text('${(100 - (percent * 100)).toStringAsFixed(0)}% left'),
+                    const Text('0/1'),
+                    //Text('${(100 - (percent * 100)).toStringAsFixed(0)}% left'),
                   ],
                 ),
               ],
