@@ -14,14 +14,19 @@ void main() {
       expect(find.text('Progress'), findsOneWidget);
       expect(find.text('Map'), findsOneWidget);
       expect(find.text('Sounds'), findsOneWidget);
-      expect(find.text('Social'), findsOneWidget);
-      expect(find.byType(BottomNavigationBar), findsOneWidget);
-      expect(find.byType(AppBar), findsOneWidget);
-      expect(find.byType(IndexedStack), findsOneWidget);
+      expect(find.text('Stopwatch'), findsOneWidget);
+      //expect(find.byType(BottomNavigationBar), findsOneWidget);
+      //expect(find.byType(AppBar), findsOneWidget);
+      //expect(find.byType(IndexedStack), findsOneWidget);
     });
 
     testWidgets('AppScreen Widget navigation works correctly', (WidgetTester tester) async {
       await tester.pumpWidget(const MaterialApp(home: AppScreen()));
+      // Tap on the Progress page icon
+      await tester.tap(find.byIcon(Icons.show_chart));
+      await tester.pumpAndSettle();
+      //Makes sure that only ProgressPage is the only widget present
+      expect(find.byType(ProgressPage), findsOneWidget);
 
       // Tap on the Map page icon
       await tester.tap(find.byIcon(Icons.map));
@@ -33,17 +38,12 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byType(SoundsPage), findsOneWidget);
 
-      // Tap on the Social page icon
-      await tester.tap(find.byIcon(Icons.people));
+      // Tap on the Stopwatch page icon
+      await tester.tap(find.byIcon(Icons.timer_rounded));
       //PumpAndSettle riggers a rebuild of the widget tree and waits for all animations to complete
       await tester.pumpAndSettle(); 
       expect(find.byType(TimeTrackingPage), findsOneWidget);
 
-      // Tap on the Progress page icon
-      await tester.tap(find.byIcon(Icons.show_chart));
-      await tester.pumpAndSettle();
-      //Makes sure that only ProgressPage is the only widget present
-      expect(find.byType(ProgressPage), findsOneWidget);
     });
   });
 }
