@@ -71,7 +71,7 @@ class _BarChartContentState extends State<BarChartContent> {
                           case 1:
                             return const Text('Mon');
                           case 2:
-                            return const Text('Tues');
+                            return const Text('Tue');
                           case 3:
                             return const Text('Wed');
                           case 4:
@@ -108,7 +108,7 @@ class _BarChartContentState extends State<BarChartContent> {
                   rightTitles: AxisTitles(),
                   topTitles: AxisTitles(),
                 ),
-                backgroundColor: const Color.fromARGB(255, 37, 109, 37),
+                backgroundColor: Colors.black38,
                 gridData: FlGridData(
                   drawVerticalLine: false,
                   horizontalInterval: dailyGoal,

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:urban_escape_application/app_pages/progress_page/daily_banner_page.dart';
 import 'dart:async';
 import 'package:urban_escape_application/database/local_user.dart';

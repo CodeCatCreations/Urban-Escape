@@ -136,7 +136,6 @@ class _MapPageState extends State<MapPage> {
     fetchHighNoisePollutionPolygonPoints();
   }
 
-
   void createSavedMarker(LatLng position) {
     setState(() {
       // Check if the marker with the given MarkerId already exists in savedMarkers
@@ -153,23 +152,21 @@ class _MapPageState extends State<MapPage> {
           icon: magentaIcon,
           onDragEnd: (LatLng newPosition) {
             setState(() {
-              Marker oldMarker = LocalUser.savedMarkers.firstWhere((marker) => marker.markerId.value == position.toString());
+              Marker oldMarker = LocalUser.savedMarkers.firstWhere(
+                  (marker) => marker.markerId.value == position.toString());
               Marker newMarker = Marker(
-                markerId: MarkerId(newPosition.toString()),
-                position: newPosition,
-                draggable: false,
-                icon: blueIcon,
-                infoWindow: createInfoWindow(newPosition, context)
-              );
+                  markerId: MarkerId(newPosition.toString()),
+                  position: newPosition,
+                  draggable: false,
+                  icon: blueIcon,
+                  infoWindow: createInfoWindow(newPosition, context));
 
               LocalUser.savedMarkers.remove(oldMarker);
               LocalUser.savedMarkers.add(newMarker);
 
-
               addMarkerPressed = false;
               setState(() {});
               LocalUser().saveData();
-
             });
           },
         ),
@@ -177,32 +174,21 @@ class _MapPageState extends State<MapPage> {
     });
   }
 
-
   void changeMarkerTitle(LatLng position, String newTitle) {
     // Refresh the map to show the new marker color
     LocalUser.savedMarkers = LocalUser.savedMarkers.map((marker) {
-        if (marker.markerId.value == position.toString()) {
-          return marker.copyWith(
-            draggableParam: false,
-            iconParam: blueIcon,
-            infoWindowParam: marker.infoWindow.copyWith(titleParam: newTitle),
-          );
-        }
-        return marker;
-      }).toSet(); // Convert back to a Set
+      if (marker.markerId.value == position.toString()) {
+        return marker.copyWith(
+          draggableParam: false,
+          iconParam: blueIcon,
+          infoWindowParam: marker.infoWindow.copyWith(titleParam: newTitle),
+        );
+      }
+      return marker;
+    }).toSet(); // Convert back to a Set
 
-      setState(() {});
-      LocalUser().saveData();
-  }
-
-    void showAchievementPopup(BuildContext context) async {
-    bool achievementPopupShown = await LocalUser.getSaveAMarkerAchievementPopupShown();
-    if (!achievementPopupShown) {
-      // ignore: use_build_context_synchronously
-      ProgressBannerBar.show(
-          context, 'Congrats! You have just passed an achievement!');
-    }
-    LocalUser.setSaveAMarkerAchievementPopupShown(true);
+    setState(() {});
+    LocalUser().saveData();
   }
 
   @override
@@ -220,7 +206,7 @@ class _MapPageState extends State<MapPage> {
         },
         markers: showParks ? allMarkers : LocalUser.savedMarkers,
         polygons: {
-          if (showHighNoisePollutionPolygons) ...highNoisePollutionPolygonSet,
+          if (showHighNoisePollutionPolygons)  ...highNoisePollutionPolygonSet,
           if (showLowPollutionPolygons) ...lowNoisePollutionPolygonSet,
           if (showEcoSignificantAreasPolygons) ...ecoSignificantAreasPolygonSet,
         },
@@ -233,61 +219,60 @@ class _MapPageState extends State<MapPage> {
             child: ElevatedButton(
               onPressed: () async {},
               style: ButtonStyle(
-                backgroundColor: MaterialStateProperty.all<Color>(Colors.transparent),
+                backgroundColor:
+                    MaterialStateProperty.all<Color>(Colors.transparent),
                 elevation: MaterialStateProperty.all<double>(0),
-
               ),
-
-              child: addMarkerPressed ?
-
-              ElevatedButton(
-              onPressed: null,
-              style: ButtonStyle(
-                backgroundColor: MaterialStateProperty.resolveWith<Color>(
-                      (Set<MaterialState> states) {
-                    return Colors.orange;
-                  },
-                ),
-              ),
-              child: Container(
-                margin: EdgeInsets.zero,
-                padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 8.0),
-                child: const Text(
-                  'Drag the marker',
-                  style: TextStyle(color: Colors.black),
-                ),
-              ),
-            ) : ElevatedButton(
-                onPressed: () async {
-                  addMarkerPressed = true;
-                  // Get the center coordinates of the map view
-                  LatLng center = await mapController.getLatLng(
-                    const ScreenCoordinate(x: 500, y: 500),
-                  );
-                  createSavedMarker(center);
-                },
-                style: ButtonStyle(
-                  backgroundColor: MaterialStateProperty.resolveWith<Color>(
-                        (Set<MaterialState> states) {
-                      return Colors.blue;
-                    },
-                  ),
-                ),
-                child: Container(
-                  margin: EdgeInsets.zero,
-                  padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 8.0),
-                  child: const Text(
-                    'Create marker',
-                    style: TextStyle(color: Colors.white),
-                  ),
-                ),
-              ),
+              child: addMarkerPressed
+                  ? ElevatedButton(
+                      onPressed: null,
+                      style: ButtonStyle(
+                        backgroundColor:
+                            MaterialStateProperty.resolveWith<Color>(
+                          (Set<MaterialState> states) {
+                            return Colors.orange;
+                          },
+                        ),
+                      ),
+                      child: Container(
+                        margin: EdgeInsets.zero,
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10.0, vertical: 8.0),
+                        child: const Text(
+                          'Drag the marker',
+                          style: TextStyle(color: Colors.black),
+                        ),
+                      ),
+                    )
+                  : ElevatedButton(
+                      onPressed: () async {
+                        addMarkerPressed = true;
+                        // Get the center coordinates of the map view
+                        LatLng center = await mapController.getLatLng(
+                          const ScreenCoordinate(x: 500, y: 500),
+                        );
+                        createSavedMarker(center);
+                      },
+                      style: ButtonStyle(
+                        backgroundColor:
+                            MaterialStateProperty.resolveWith<Color>(
+                          (Set<MaterialState> states) {
+                            return Colors.blue;
+                          },
+                        ),
+                      ),
+                      child: Container(
+                        margin: EdgeInsets.zero,
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10.0, vertical: 8.0),
+                        child: const Text(
+                          'Create marker',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ),
+                    ),
             ),
           ),
-
-
-
-
           Positioned(
             bottom: 16.0,
             left: 20.0,
@@ -316,7 +301,7 @@ class _MapPageState extends State<MapPage> {
                     },
                     style: ButtonStyle(
                       backgroundColor: MaterialStateProperty.resolveWith<Color>(
-                            (Set<MaterialState> states) {
+                        (Set<MaterialState> states) {
                           if (states.contains(MaterialState.disabled)) {
                             return Colors.grey;
                           }
@@ -336,11 +321,13 @@ class _MapPageState extends State<MapPage> {
                     },
                     style: ButtonStyle(
                       backgroundColor: MaterialStateProperty.resolveWith<Color>(
-                            (Set<MaterialState> states) {
+                        (Set<MaterialState> states) {
                           if (states.contains(MaterialState.disabled)) {
                             return Colors.grey;
                           }
-                          return showHighNoisePollutionPolygons ? Colors.grey : Colors.black54;
+                          return showHighNoisePollutionPolygons
+                              ? Colors.grey
+                              : Colors.black54;
                         },
                       ),
                     ),
@@ -358,11 +345,13 @@ class _MapPageState extends State<MapPage> {
                     },
                     style: ButtonStyle(
                       backgroundColor: MaterialStateProperty.resolveWith<Color>(
-                            (Set<MaterialState> states) {
+                        (Set<MaterialState> states) {
                           if (states.contains(MaterialState.disabled)) {
                             return Colors.grey;
                           }
-                          return showEcoSignificantAreasPolygons ? Colors.blue : Colors.lightBlueAccent;
+                          return showEcoSignificantAreasPolygons
+                              ? Colors.blue
+                              : Colors.lightBlueAccent;
                         },
                       ),
                     ),
@@ -401,7 +390,8 @@ class _MapPageState extends State<MapPage> {
                 TextButton(
                   child: const Text("Remove"),
                   onPressed: () {
-                    LocalUser.savedMarkers.removeWhere((marker) => marker.markerId.value == newPosition.toString());
+                    LocalUser.savedMarkers.removeWhere((marker) =>
+                        marker.markerId.value == newPosition.toString());
                     setState(() {});
                     LocalUser().saveData();
                     Navigator.of(context).pop();
@@ -418,7 +408,6 @@ class _MapPageState extends State<MapPage> {
                   onPressed: () {
                     changeMarkerTitle(newPosition, newTitle);
                     Navigator.of(context).pop();
-                    showAchievementPopup(context);
                   },
                 ),
               ],
@@ -428,5 +417,4 @@ class _MapPageState extends State<MapPage> {
       },
     );
   }
-
 }

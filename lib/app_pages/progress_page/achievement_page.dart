@@ -22,26 +22,29 @@ class _AchievementPageState extends State<AchievementPage> {
           "To complete this achievement: \n\nGo to the stopwatch: Start the stopwatch and pause it",
       maxLevel: 1,
       icon: const Icon(Icons.timer_rounded, color: Colors.green));
-  final Achievement saveAMarkerAchievement = Achievement(
-      title: "Save-A-Marker",
+  
+  final Achievement soundsAchievement = Achievement(
+      title: "Wave-Listener",
       description:
-          "To complete this achievement: \n\nGo to maps: Create a marker, hold the marker and drag it to your favourite spot. Click on the marker and get it a new name and make sure to save it!",
+          "To complete this achievement: \n\nGo to the sounds page and turn on the waves sound",
       maxLevel: 1,
-      icon: const Icon(Icons.map_rounded, color: Colors.green));
+      icon: const Icon(Icons.waves_rounded, color: Colors.green));
 
   final LocalUser localUser = LocalUser();
 
   @override
   Widget build(BuildContext context) {
+ 
     if (LocalUser.goalAchievementPopUpHasBeenShown) {
       goalAchievement.incrementLevel();
     }
     if (LocalUser.timerAchievementPopupShown) {
       timeTrackerAchievement.incrementLevel();
     }
-    if (LocalUser.saveAMarkerAchievementPopupShown) {
-      saveAMarkerAchievement.incrementLevel();
+    if (LocalUser.soundsAchievementPopupShown) {
+      soundsAchievement.incrementLevel();
     }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Achievements'),
@@ -60,7 +63,7 @@ class _AchievementPageState extends State<AchievementPage> {
           children: [
             goalAchievement,
             timeTrackerAchievement,
-            saveAMarkerAchievement,
+            soundsAchievement,
           ],
         ),
       ),
