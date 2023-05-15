@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:urban_escape_application/app_pages/settings_page.dart';
 import '../app_pages/progress_page/progress_page.dart';
 import '../app_pages/time_page/time_tracking.dart';
 import '../app_pages/sounds_page.dart';
 import '../app_pages/map_pages/map_page.dart';
 import '../app_pages/progress_page/daily_banner_page.dart';
+import '../database/time_data.dart';
 
 //Creating a stateful widget called AppScreen
 class AppScreen extends StatefulWidget {
@@ -35,7 +37,11 @@ class _AppScreenState extends State<AppScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold( //Returning a widget that contains the AppBar, the body and the BottomNavigationBar
+    return
+      ChangeNotifierProvider<TimeData>(
+          create: (context) => TimeData(),
+
+      child: Scaffold( //Returning a widget that contains the AppBar, the body and the BottomNavigationBar
       appBar: AppBar(
         /*
         Adding an IconButton to the AppBar's leading that toggles 
@@ -106,6 +112,10 @@ class _AppScreenState extends State<AppScreen> {
           ),
         ],
       ),
+    ),
+
     );
+
+
   }
 }
