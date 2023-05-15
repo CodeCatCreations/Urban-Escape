@@ -115,9 +115,9 @@ class ProgressPageState extends State<ProgressPage> {
                 colors: [Colors.blue, Colors.white],
               ),
             ),
-            child: Column(
+            child: ListView(
               children: [
-                Container(
+               Container(
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10),
                     //color: const Color.fromARGB(255, 209, 209, 209),
