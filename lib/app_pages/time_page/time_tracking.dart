@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 import 'package:provider/provider.dart';
+import 'package:urban_escape_application/app_pages/progress_page/daily_banner_page.dart';
 import 'dart:async';
 import 'package:urban_escape_application/database/local_user.dart';
 
@@ -19,7 +20,7 @@ class _TimeTrackingPageState extends State<TimeTrackingPage> {
   int _goal = 10;
   Timer _timer = Timer(Duration.zero, () {});
   bool click = true;
-
+  
   Future<void> loadLastStopwatchTime() async {
 
     final lastTimeUserStoppedTheTime = await LocalUser.loadStopwatchTime();
@@ -87,10 +88,11 @@ class _TimeTrackingPageState extends State<TimeTrackingPage> {
     });
   }
 
-  void stopTimer() {
+  void stopTimer(BuildContext context) {
     _timer.cancel();
     // Save the current stopwatch time to shared_preferences when stopped
     saveLastStopwatchTime(_passedTime);
+    showAchievementPopup(context);
   }
 
   void resetTimer() {
@@ -104,6 +106,16 @@ class _TimeTrackingPageState extends State<TimeTrackingPage> {
   String get timerText {
     Duration duration = Duration(milliseconds: _passedTime * 10);
     return "${duration.inMinutes.remainder(60).toString().padLeft(2, '0')}:${(duration.inSeconds.remainder(60)).toString().padLeft(2, '0')}";
+  }
+
+  void showAchievementPopup(BuildContext context) async {
+    bool achievementPopupShown = await LocalUser.getTimerAchievementPopupShown();
+    if (!achievementPopupShown) {
+      // ignore: use_build_context_synchronously
+      ProgressBannerBar.show(
+          context, 'Congrats! You have just passed an achievement!');
+    }
+    LocalUser.setTimerAchievementPopupShown(true);
   }
 
   @override
@@ -174,7 +186,7 @@ class _TimeTrackingPageState extends State<TimeTrackingPage> {
                           onPressed: () {
                             setState(() {
                               click = !click;
-                              (click == false) ? startTimer() : stopTimer();
+                              (click == false) ? startTimer() : stopTimer(context);
                             });
                           },
                           icon: Icon((click == false) ? Icons.pause_circle_filled :
@@ -209,3 +221,4 @@ class _TimeTrackingPageState extends State<TimeTrackingPage> {
     );
   }
 }
+          

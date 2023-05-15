@@ -1,8 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:urban_escape_application/app_pages/progress_page/daily_banner_page.dart';
+import 'package:urban_escape_application/database/local_user.dart';
 
 class SoundsPage extends StatelessWidget {
   const SoundsPage({Key? key}) : super(key: key);
+
+  void showAchievementPopup(BuildContext context) async {
+    bool achievementPopupShown =
+        await LocalUser.getSoundAchievementPopupShown();
+    if (!achievementPopupShown) {
+      // ignore: use_build_context_synchronously
+      ProgressBannerBar.show(
+          context, 'Congrats! You have just passed an achievement!');
+    }
+    LocalUser.setSoundsAchievementPopupShown(true);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -135,6 +148,9 @@ class _SoundWidgetState extends State<SoundWidget> {
   void _playSound() async {
     _audioPlayer.setReleaseMode(ReleaseMode.loop);
     await _audioPlayer.play(widget.soundFileSource);
+    if (widget.imageFilePath == 'assets/icons/wave.png') {
+        SoundsPage().showAchievementPopup(context);
+    }
   }
 
   void _stopSound() {

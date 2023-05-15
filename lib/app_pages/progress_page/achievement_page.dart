@@ -2,43 +2,51 @@ import 'package:flutter/material.dart';
 import 'package:urban_escape_application/app_pages/progress_page/achievement.dart';
 import 'package:urban_escape_application/database/local_user.dart';
 
-class AchievementPage extends StatelessWidget {
+class AchievementPage extends StatefulWidget {
+  const AchievementPage({Key? key}) : super(key: key);
+
+  @override
+  _AchievementPageState createState() => _AchievementPageState();
+}
+
+class _AchievementPageState extends State<AchievementPage> {
   final Achievement goalAchievement = Achievement(
       title: "Goal-oriented",
-      description: "Set a goal",
+      description: "To complete this achievement: \n\nGo to the Progress Page: Click on the 'Set Goal' and set a goal!",
       maxLevel: 1,
       icon: const Icon(Icons.flag, color: Colors.green));
-  final Achievement natureLoverAchievement = Achievement(
-      title: "NatureLover",
-      description: "Place a pin on a park",
-      maxLevel: 5,
-      icon: const Icon(Icons.nature, color: Colors.green));
-  final Achievement streakAchievement = Achievement(
-      title: "Streak",
-      description: "Maintain a five-day streak!",
-      maxLevel: 5,
-      icon: const Icon(Icons.star, color: Colors.blue));
 
-  final LocalUser _localUser = LocalUser();
+  final Achievement timeTrackerAchievement = Achievement(
+      title: "Time-Tracker",
+      description:
+          "To complete this achievement: \n\nGo to the stopwatch: Start the stopwatch and pause it",
+      maxLevel: 1,
+      icon: const Icon(Icons.timer_rounded, color: Colors.green));
+  
+  final Achievement soundsAchievement = Achievement(
+      title: "Wave-Listener",
+      description:
+          "To complete this achievement: \n\nGo to the sounds page and turn on the waves sound",
+      maxLevel: 1,
+      icon: const Icon(Icons.waves_rounded, color: Colors.green));
 
-  AchievementPage({super.key});
+  final LocalUser localUser = LocalUser();
 
   @override
   Widget build(BuildContext context) {
-    final hasSetGoal = _localUser.goalAdded();
-    if (hasSetGoal) {
+ 
+    if (LocalUser.goalAchievementPopUpHasBeenShown) {
       goalAchievement.incrementLevel();
+      goalAchievement.changeDescription("Congragulations! \n\nYou've earned this achievement because you've set a goal");
     }
-    if (_localUser.getPinStatus()) {
-      print("Success");
-      natureLoverAchievement.incrementLevel();
+    if (LocalUser.timerAchievementPopupShown) {
+      timeTrackerAchievement.incrementLevel();
+      timeTrackerAchievement.changeDescription("Congragulations! \n\nYou've earned this achievement because you used the stopwatch!");
     }
-
-    /*if(_localUser.getMarkerList().isNotEmpty){
-    log(_localUser.markersList.length);
-    natureLoverAchievement.incrementLevel();
-    log(_localUser.getMarkerList().length);
-  }*/
+    if (LocalUser.soundsAchievementPopupShown) {
+      soundsAchievement.incrementLevel();
+      soundsAchievement.changeDescription("Congragulations! \n\nYou've earned this achievement because you listened to the waves!");
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -57,8 +65,8 @@ class AchievementPage extends StatelessWidget {
           padding: const EdgeInsets.all(16.0),
           children: [
             goalAchievement,
-            natureLoverAchievement,
-            streakAchievement,
+            timeTrackerAchievement,
+            soundsAchievement,
           ],
         ),
       ),
