@@ -12,15 +12,6 @@ class LocalUser {
 
   bool hasPinned = false;
   LocalUser._internal();
-/*
-  List<Map<String, dynamic>> markersList = savedMarkers.map((marker) {
-    return {
-      'markerId': marker.markerId.value,
-      'latitude': marker.position.latitude,
-      'longitude': marker.position.longitude,
-    };
-  }).toList();
-  */
 
 
   static Set<Marker> savedMarkers = {};
