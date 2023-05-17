@@ -1,6 +1,7 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:urban_escape_application/app_pages/progress_page/daily_banner_page.dart';
 
 import '../../database/local_user.dart';
 import '../../database/time_data.dart';
@@ -19,7 +20,7 @@ class _BarChartContentState extends State<BarChartContent> {
   double maxBarHeight = 1.0;
   double dailyGoal = 1.0;
 
-  Future<void> fetchData() async {
+  Future<void> fetchData(BuildContext context) async {
     List<BarChartGroupData> data = [];
     dailyGoal = await LocalUser.loadWeeklyGoal() / 7.0;
     if (dailyGoal != 0) {
@@ -30,6 +31,7 @@ class _BarChartContentState extends State<BarChartContent> {
       Color color = const Color(0xFF9E9E9E);
       if (minutesSpent > dailyGoal) {
         color = const Color(0xFF51C057);
+        showAchievementPopup(context);
         if (minutesSpent * 1.1 > maxBarHeight) {
           maxBarHeight = minutesSpent * 1.1;
         }
@@ -48,12 +50,22 @@ class _BarChartContentState extends State<BarChartContent> {
     barChartData = data;
   }
 
+    void showAchievementPopup(BuildContext context) async {
+    bool achievementPopupShown = await LocalUser.getGoalReacherAchievementPopupShown();
+    if (!achievementPopupShown) {
+      // ignore: use_build_context_synchronously
+      ProgressBannerBar.show(
+          context, 'Congrats! You have just passed an achievement!');
+    }
+    LocalUser.setGoalReacherAchievementPopupShown(true);
+  }
+
   @override
   Widget build(BuildContext context) {
     Consumer<TimeData> chart =
         Consumer<TimeData>(builder: (context, myData, child) {
           return FutureBuilder(
-            future: fetchData(),
+            future: fetchData(context),
             builder: (context, _) {
             return BarChart(
               BarChartData(
