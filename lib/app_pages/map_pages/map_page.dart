@@ -1,5 +1,4 @@
 import 'dart:collection';
-
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:urban_escape_application/app_pages/progress_page/daily_banner_page.dart';
@@ -22,6 +21,7 @@ class _MapPageState extends State<MapPage> {
       BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure);
 
   late GoogleMapController mapController;
+
   bool showParks = false;
   bool showHighNoisePollutionPolygons = false;
   bool showLowPollutionPolygons = false;
@@ -60,28 +60,6 @@ class _MapPageState extends State<MapPage> {
     }
   }
 
-  Future<void> fetchLowNoisePollutionPolygonPoints() async {
-    var mariaDB = MariaDB();
-    final polygonData = await mariaDB.fetchLowNoisePollutionPolygons();
-    polygonData.forEach((id, coordinates) {
-      final polygonPoints = <LatLng>[];
-      for (final coordinate in coordinates) {
-        final latitude = coordinate['latitude'];
-        final longitude = coordinate['longitude'];
-        polygonPoints.add(LatLng(latitude, longitude));
-      }
-      final polygon = Polygon(
-        polygonId: PolygonId(id.toString()),
-        points: polygonPoints,
-        fillColor: Colors.red,
-        strokeColor: Colors.blue,
-        strokeWidth: 4,
-        geodesic: true,
-      );
-      lowNoisePollutionPolygonSet.add(polygon);
-    });
-  }
-
   Future<void> fetchHighNoisePollutionPolygonPoints() async {
     var mariaDB = MariaDB();
     final polygonData = await mariaDB.fetchHighNoisePollutionPolygons();
@@ -118,7 +96,7 @@ class _MapPageState extends State<MapPage> {
         polygonId: PolygonId(id.toString()),
         points: ecoSignificantAreasPolygonPoints,
         fillColor: Colors.transparent,
-        strokeColor: Colors.blue,
+        strokeColor: Colors.green.shade500,
         strokeWidth: 4,
         geodesic: true,
       );
@@ -206,16 +184,18 @@ class _MapPageState extends State<MapPage> {
         },
         markers: showParks ? allMarkers : LocalUser.savedMarkers,
         polygons: {
-          if (showHighNoisePollutionPolygons)  ...highNoisePollutionPolygonSet,
+          if (showHighNoisePollutionPolygons) ...highNoisePollutionPolygonSet,
           if (showLowPollutionPolygons) ...lowNoisePollutionPolygonSet,
           if (showEcoSignificantAreasPolygons) ...ecoSignificantAreasPolygonSet,
         },
+        myLocationEnabled: true,
+        myLocationButtonEnabled: true,
       ),
       floatingActionButton: Stack(
         children: [
           Positioned(
             bottom: 16.0,
-            left: 85.0,
+            left: 135.0,
             child: ElevatedButton(
               onPressed: () async {},
               style: ButtonStyle(
@@ -266,7 +246,7 @@ class _MapPageState extends State<MapPage> {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 10.0, vertical: 8.0),
                         child: const Text(
-                          'Create marker',
+                          'Create Marker',
                           style: TextStyle(color: Colors.white),
                         ),
                       ),
@@ -275,7 +255,7 @@ class _MapPageState extends State<MapPage> {
           ),
           Positioned(
             bottom: 16.0,
-            left: 20.0,
+            left: 35.0,
             child: FloatingActionButton(
               onPressed: () {
                 setState(() {
@@ -300,18 +280,35 @@ class _MapPageState extends State<MapPage> {
                       });
                     },
                     style: ButtonStyle(
+                      padding: MaterialStateProperty.all<EdgeInsets>(
+                        const EdgeInsets.only(left: 8),
+                      ),
                       backgroundColor: MaterialStateProperty.resolveWith<Color>(
                         (Set<MaterialState> states) {
                           if (states.contains(MaterialState.disabled)) {
                             return Colors.grey;
                           }
-                          return showParks ? Colors.grey : Colors.green;
+                          return showParks
+                              ? Colors.grey
+                              : Colors.green.shade500;
                         },
                       ),
                     ),
-                    child: Text(showParks ? 'Hide Parks' : 'Show Parks'),
+                    child: Row(
+                      children: [
+                        Text(showParks ? 'Hide Parks' : 'Show Parks'),
+                        const SizedBox(width: 0),
+                        IconButton(
+                          icon: const Icon(Icons.info),
+                          onPressed: () {
+                            ProgressBannerBar.show(context,
+                                'Shows Parks Registered In Stockholm Municipality');
+                          },
+                        ),
+                      ],
+                    ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 10),
                   ElevatedButton(
                     onPressed: () {
                       setState(() {
@@ -320,6 +317,9 @@ class _MapPageState extends State<MapPage> {
                       });
                     },
                     style: ButtonStyle(
+                      padding: MaterialStateProperty.all<EdgeInsets>(
+                        const EdgeInsets.symmetric(vertical: 0, horizontal: 8),
+                      ),
                       backgroundColor: MaterialStateProperty.resolveWith<Color>(
                         (Set<MaterialState> states) {
                           if (states.contains(MaterialState.disabled)) {
@@ -327,38 +327,66 @@ class _MapPageState extends State<MapPage> {
                           }
                           return showHighNoisePollutionPolygons
                               ? Colors.grey
-                              : Colors.black54;
+                              : Colors.green.shade500;
                         },
                       ),
                     ),
-                    child: Text(showHighNoisePollutionPolygons
-                        ? 'Hide High Noise Pollution'
-                        : 'Show High Noise Pollution'),
+                    child: Row(
+                      children: [
+                        Text(showHighNoisePollutionPolygons
+                            ? 'Hide High Noise Pollution'
+                            : 'Show High Noise Pollution'),
+                        const SizedBox(width: 0),
+                        IconButton(
+                          icon: const Icon(Icons.info),
+                          onPressed: () {
+                            ProgressBannerBar.show(context,
+                                'This Filter Displays Noise Pollution over 70 decibels');
+                          },
+                        ),
+                      ],
+                    ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 10),
                   ElevatedButton(
-                    onPressed: () {
-                      setState(() {
-                        showEcoSignificantAreasPolygons =
-                            !showEcoSignificantAreasPolygons;
-                      });
-                    },
-                    style: ButtonStyle(
-                      backgroundColor: MaterialStateProperty.resolveWith<Color>(
-                        (Set<MaterialState> states) {
-                          if (states.contains(MaterialState.disabled)) {
-                            return Colors.grey;
-                          }
-                          return showEcoSignificantAreasPolygons
-                              ? Colors.blue
-                              : Colors.lightBlueAccent;
-                        },
+                      onPressed: () {
+                        setState(() {
+                          showEcoSignificantAreasPolygons =
+                              !showEcoSignificantAreasPolygons;
+                        });
+                      },
+                      style: ButtonStyle(
+                        padding: MaterialStateProperty.all<EdgeInsets>(
+                          const EdgeInsets.symmetric(
+                              vertical: 0, horizontal: 8),
+                        ),
+                        backgroundColor:
+                            MaterialStateProperty.resolveWith<Color>(
+                          (Set<MaterialState> states) {
+                            if (states.contains(MaterialState.disabled)) {
+                              return Colors.grey;
+                            }
+                            return showEcoSignificantAreasPolygons
+                                ? Colors.grey
+                                : Colors.green.shade500;
+                          },
+                        ),
                       ),
-                    ),
-                    child: Text(showEcoSignificantAreasPolygons
-                        ? 'Hide Eco Significant Areas'
-                        : 'Show Eco Significant Areas'),
-                  ),
+                      child: Row(
+                        children: [
+                          Text(showEcoSignificantAreasPolygons
+                              ? 'Hide Eco Significant Areas'
+                              : 'Show Eco Significant Areas'),
+                          const SizedBox(width: 0, height: 0),
+                          IconButton(
+                            icon: const Icon(Icons.info),
+                            onPressed: () {
+                              ProgressBannerBar.show(context,
+                                  'This Filter Displays Nature Conservation Areas');
+                            },
+                          ),
+                        ],
+                      )),
                 ],
               ),
             ),
@@ -367,7 +395,7 @@ class _MapPageState extends State<MapPage> {
     );
   }
 
-  createInfoWindow(LatLng newPosition, BuildContext context) {
+  InfoWindow createInfoWindow(LatLng newPosition, BuildContext context) {
     return InfoWindow(
       title: newPosition.toString(), // Set the new title for the marker
       onTap: () {
