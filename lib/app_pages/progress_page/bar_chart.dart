@@ -22,9 +22,10 @@ class _BarChartContentState extends State<BarChartContent> {
   Future<void> fetchData() async {
     List<BarChartGroupData> data = [];
     dailyGoal = await LocalUser.loadWeeklyGoal() / 7.0;
-    if (dailyGoal != 0) {
-      maxBarHeight = dailyGoal;
+    if (dailyGoal == 0) {
+      dailyGoal = 120 / 7.0;
     }
+    maxBarHeight = dailyGoal;
     for (int i = 1; i <= 7; i++) {
       double minutesSpent = (await LocalUser().loadRecordedTimeWeekday(i)) / 6000.0;
       Color color = const Color(0xFF9E9E9E);
