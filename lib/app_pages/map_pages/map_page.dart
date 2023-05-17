@@ -1,11 +1,9 @@
 import 'dart:collection';
-
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:urban_escape_application/app_pages/progress_page/daily_banner_page.dart';
 import 'package:urban_escape_application/database/maria_sql.dart';
 import 'package:urban_escape_application/database//local_user.dart';
-import 'package:geolocator/geolocator.dart';
 
 class MapPage extends StatefulWidget {
   const MapPage({super.key});
@@ -23,11 +21,7 @@ class _MapPageState extends State<MapPage> {
       BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure);
 
   late GoogleMapController mapController;
-  static const CameraPosition initialCameraPosition = CameraPosition(
-    target: LatLng(59.3293, 18.0686),
-    zoom: 12,
-  );
-  Set<Marker> markers = {};
+
   bool showParks = false;
   bool showHighNoisePollutionPolygons = false;
   bool showLowPollutionPolygons = false;
@@ -175,34 +169,6 @@ class _MapPageState extends State<MapPage> {
     LocalUser().saveData();
   }
 
-  Future<Position> _determinePosition() async {
-    bool serviceEnabled;
-    LocationPermission permission;
-
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      return Future.error("Location services are disabled");
-    }
-
-    permission = await Geolocator.checkPermission();
-
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-
-      if (permission == LocationPermission.denied) {
-        return Future.error("Location permission denied");
-      }
-    }
-
-    if (permission == LocationPermission.deniedForever) {
-      return Future.error("Location permissions are permanently denied");
-    }
-
-    Position position = await Geolocator.getCurrentPosition();
-
-    return position;
-  }
-
   @override
   Widget build(BuildContext context) {
     final Set<Marker> allMarkers = {...parkMarkers, ...LocalUser.savedMarkers};
@@ -228,34 +194,8 @@ class _MapPageState extends State<MapPage> {
       floatingActionButton: Stack(
         children: [
           Positioned(
-            bottom: 15,
-            right: 65,
-            child: Container(
-              decoration: const BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.white70,
-              ),
-              child: IconButton(
-                onPressed: () async {
-                  Position position = await _determinePosition();
-                  mapController.animateCamera(CameraUpdate.newCameraPosition(
-                      CameraPosition(
-                          target:
-                              LatLng(position.latitude, position.longitude), zoom: 15)));
-                  markers.add(Marker(markerId: const MarkerId("currentLocation"), position: LatLng(position.latitude, position.longitude)));
-                  setState(() {});
-                },
-                icon: Image.asset(
-                  'assets/icons/gps.png',
-                  width: 60,
-                  height: 60,
-                ),
-              ),
-            ),
-          ),
-          Positioned(
             bottom: 16.0,
-            left: 100.0,
+            left: 135.0,
             child: ElevatedButton(
               onPressed: () async {},
               style: ButtonStyle(
@@ -315,7 +255,7 @@ class _MapPageState extends State<MapPage> {
           ),
           Positioned(
             bottom: 16.0,
-            left: 25.0,
+            left: 35.0,
             child: FloatingActionButton(
               onPressed: () {
                 setState(() {
@@ -357,7 +297,7 @@ class _MapPageState extends State<MapPage> {
                     child: Row(
                       children: [
                         Text(showParks ? 'Hide Parks' : 'Show Parks'),
-                        const SizedBox(),
+                        const SizedBox(width: 0),
                         IconButton(
                           icon: const Icon(Icons.info),
                           onPressed: () {
@@ -368,7 +308,7 @@ class _MapPageState extends State<MapPage> {
                       ],
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 10),
                   ElevatedButton(
                     onPressed: () {
                       setState(() {
@@ -396,7 +336,7 @@ class _MapPageState extends State<MapPage> {
                         Text(showHighNoisePollutionPolygons
                             ? 'Hide High Noise Pollution'
                             : 'Show High Noise Pollution'),
-                        const SizedBox(width: 5),
+                        const SizedBox(width: 0),
                         IconButton(
                           icon: const Icon(Icons.info),
                           onPressed: () {
@@ -407,7 +347,7 @@ class _MapPageState extends State<MapPage> {
                       ],
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 10),
                   ElevatedButton(
                       onPressed: () {
                         setState(() {
@@ -437,7 +377,7 @@ class _MapPageState extends State<MapPage> {
                           Text(showEcoSignificantAreasPolygons
                               ? 'Hide Eco Significant Areas'
                               : 'Show Eco Significant Areas'),
-                          const SizedBox(width: 5),
+                          const SizedBox(width: 0, height: 0),
                           IconButton(
                             icon: const Icon(Icons.info),
                             onPressed: () {
