@@ -62,6 +62,7 @@ class _TimeTrackingPageState extends State<TimeTrackingPage> {
   void loadLastDayAppOpened() async {
     String lastDayAppOpened = await LocalUser.lastDayAppWasOpened();
     if (lastDayAppOpened != DateTime.now().day.toString()) {
+      resetTimer();
       if (DateTime.now().day == DateTime.monday) {
         LocalUser.resetRecordedTimeWeekday();
       }
@@ -78,10 +79,10 @@ class _TimeTrackingPageState extends State<TimeTrackingPage> {
 
   void startTimer() {
     if (_timer.isActive) return;
-    _timer = Timer.periodic(const Duration(milliseconds: 20), (timer) async {
+    _timer = Timer.periodic(const Duration(milliseconds: 100), (timer) async {
       double percent = await getPercent();
       setState(() {
-        _passedTime += 2;
+        _passedTime += 10;
         _percent = percent;
       });
       Provider.of<TimeData>(context, listen: false).updateStopTimerMS(_passedTime);
@@ -95,12 +96,13 @@ class _TimeTrackingPageState extends State<TimeTrackingPage> {
     showAchievementPopup(context);
   }
 
-  void resetTimer() {
+  void resetTimer() async {
     setState(() {
       _passedTime = 0;
       _percent = 0;
     });
     // Reset the saved stopwatch time in shared_preferences
+    await LocalUser.resetTimeTracker();
   }
 
   String get timerText {
@@ -122,6 +124,7 @@ class _TimeTrackingPageState extends State<TimeTrackingPage> {
   Widget build(BuildContext context) {
     Provider.of<TimeData>(context, listen: true).weeklyGoal;
     return Container(
+      width: MediaQuery.of(context).size.width,
       decoration: const BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topCenter,
@@ -186,7 +189,7 @@ class _TimeTrackingPageState extends State<TimeTrackingPage> {
                           onPressed: () {
                             setState(() {
                               if (click) {
-                                _showMyDialog();
+                                _showConfirmationDialog();
                               } else {
                                 click = !click;
                                 stopTimer(context);
@@ -205,29 +208,12 @@ class _TimeTrackingPageState extends State<TimeTrackingPage> {
               });
             }
           ),
-          
-          const SizedBox(height: 20),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-
-              ElevatedButton(
-                child: const Text('Reset'),
-                onPressed: () {
-                  setState(() {
-                    click = true;
-                  });
-                  resetTimer();
-                },
-              ),
-            ],
-          ),
         ],
       ),
     );
   }
 
-  Future<void> _showMyDialog() async {
+  Future<void> _showConfirmationDialog() async {
   return showDialog<void>(
     context: context,
     builder: (BuildContext context) {

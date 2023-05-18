@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:urban_escape_application/app_pages/progress_page/achievement.dart';
 import 'package:urban_escape_application/database/local_user.dart';

@@ -123,7 +123,8 @@ class ProgressPageState extends State<ProgressPage> {
                 colors: [Colors.blue, Colors.white],
               ),
             ),
-            child: Column(
+            child: SingleChildScrollView(
+              child: Column(
               children: [
                 Container(
                   decoration: BoxDecoration(
@@ -204,8 +205,11 @@ class ProgressPageState extends State<ProgressPage> {
                                                           int.tryParse(value) !=
                                                               null) {
                                                         if (int.parse(value) <
-                                                            1)
+                                                            1) {
                                                           return 'Goal must be more than 0 minutes!';
+                                                        } else if (int.parse(value) > 10080) {
+                                                          return 'Goal cannot be more than 10080 minutes!';
+                                                        }
                                                         return null;
                                                       }
                                                       return 'Requires a number without digits.';
@@ -342,6 +346,7 @@ class ProgressPageState extends State<ProgressPage> {
                   ),
                 ),
               ],
+              ),
             ),
           ),
         ),
@@ -350,11 +355,4 @@ class ProgressPageState extends State<ProgressPage> {
       ],
     );
   }
-}
-
-class ActivityData {
-  final String day;
-  final int minutes;
-
-  const ActivityData(this.day, this.minutes);
 }
