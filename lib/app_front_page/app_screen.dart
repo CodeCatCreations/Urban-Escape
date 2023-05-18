@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:urban_escape_application/app_pages/settings_page.dart';
 import '../app_pages/progress_page/progress_page.dart';
 import '../app_pages/time_page/time_tracking.dart';
 import '../app_pages/sounds_page.dart';
 import '../app_pages/map_pages/map_page.dart';
-import '../app_pages/progress_page/daily_banner_page.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 //Creating a stateful widget called AppScreen
 class AppScreen extends StatefulWidget {
@@ -16,7 +15,6 @@ class AppScreen extends StatefulWidget {
 
 //Creating a state class called _AppScreenState that extens the AppScreen Widget
 class _AppScreenState extends State<AppScreen> {
-  bool _showProgressBar = false;
   int _currentIndex = 0;
 
 //List containing insatnces of each page in the app
@@ -37,10 +35,21 @@ class _AppScreenState extends State<AppScreen> {
   Widget build(BuildContext context) {
     return Scaffold( //Returning a widget that contains the AppBar, the body and the BottomNavigationBar
       appBar: AppBar(
+        centerTitle: true,
+        title: Text(
+          'Urban Escape',
+          style: GoogleFonts.pacifico(
+            textStyle: const TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.w100,
+            ),
+          ),
+        ),
         /*
         Adding an IconButton to the AppBar's leading that toggles 
         the _showProgressBar variable when pressed and shows the ProgressBannerBar
         */
+        /*
         leading: IconButton(
           onPressed: () {
             setState(() {
@@ -50,10 +59,12 @@ class _AppScreenState extends State<AppScreen> {
           },
           icon: const Icon(Icons.bar_chart_sharp),
         ),
+        */
         /*
          Adding an IconButton to the AppBar's actions 
         that navigates to the SettingsPage when pressed
         */
+        /*
         actions: [
           IconButton(
             icon: const Icon(Icons.settings),
@@ -65,6 +76,7 @@ class _AppScreenState extends State<AppScreen> {
             },
           )
         ],
+        */
       ),
       /*
       Creating an IndexedStack that contains the app pages and 
