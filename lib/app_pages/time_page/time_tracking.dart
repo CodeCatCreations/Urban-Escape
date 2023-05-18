@@ -185,8 +185,14 @@ class _TimeTrackingPageState extends State<TimeTrackingPage> {
                           iconSize: 100,
                           onPressed: () {
                             setState(() {
-                              click = !click;
-                              (click == false) ? startTimer() : stopTimer(context);
+                              if (click) {
+                                _showMyDialog();
+                              } else {
+                                click = !click;
+                                stopTimer(context);
+                              }
+                              //click = !click;
+                              //(click == false) ? startTimer() : stopTimer(context);
                             });
                           },
                           icon: Icon((click == false) ? Icons.pause_circle_filled :
@@ -220,5 +226,40 @@ class _TimeTrackingPageState extends State<TimeTrackingPage> {
       ),
     );
   }
+
+  Future<void> _showMyDialog() async {
+  return showDialog<void>(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: const Text('Start Time Tracker?'),
+        content: const SingleChildScrollView(
+          child: ListBody(
+            children: <Widget>[
+              Text('Are you sure you want to start tracking your time? Once time has been tracked, you cannot remove it.'),
+              Text('\nWhen you are finished tracking, press the pause button.'),
+            ],
+          ),
+        ),
+        actions: <Widget>[
+          TextButton(
+            child: const Text('Cancel'),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+          TextButton(
+            child: const Text('Continue'),
+            onPressed: () {
+              click = !click;
+              startTimer();
+              Navigator.of(context).pop();
+            },
+          ),
+        ],
+      );
+    },
+  );
+}
 }
           
