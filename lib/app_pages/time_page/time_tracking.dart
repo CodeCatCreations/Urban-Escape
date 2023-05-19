@@ -219,9 +219,9 @@ class _TimeTrackingPageState extends State<TimeTrackingPage> {
     builder: (BuildContext context) {
       return AlertDialog(
         title: const Text('Start Time Tracker?'),
-        content: const SingleChildScrollView(
+        content:  SingleChildScrollView(
           child: ListBody(
-            children: <Widget>[
+            children: const <Widget>[
               Text('Are you sure you want to start tracking your time? Once time has been tracked, you cannot remove it.'),
               Text('\nWhen you are finished tracking, press the pause button.'),
             ],
