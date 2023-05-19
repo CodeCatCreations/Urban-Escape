@@ -15,31 +15,36 @@ class BarChartContent extends StatefulWidget {
 
 class _BarChartContentState extends State<BarChartContent> {
 
+  static const int secondsUntilDisplayedAsMinutes = 240;
+
   List<BarChartGroupData> barChartData = [];
 
   double maxBarHeight = 1.0;
   double dailyGoal = 1.0;
+  bool showAsMinutes = false;
 
   Future<void> fetchData(BuildContext context) async {
     List<BarChartGroupData> data = [];
     dailyGoal = await LocalUser.loadWeeklyGoal() / 7.0;
-    if (dailyGoal != 0) {
-      maxBarHeight = dailyGoal;
+    if (dailyGoal == 0) {
+      dailyGoal = 120 / 7.0;
     }
+    dailyGoal *= 60;
+    maxBarHeight = dailyGoal;
     for (int i = 1; i <= 7; i++) {
-      double minutesSpent = (await LocalUser().loadRecordedTimeWeekday(i)) / 6000.0;
+      double timeSpent = (await LocalUser().loadRecordedTimeWeekday(i)) / 100;
       Color color = const Color(0xFF9E9E9E);
-      if (minutesSpent > dailyGoal) {
+      if (timeSpent > dailyGoal) {
         color = const Color(0xFF51C057);
         showAchievementPopup(context);
-        if (minutesSpent * 1.1 > maxBarHeight) {
-          maxBarHeight = minutesSpent * 1.1;
+        if (timeSpent * 1.1 > maxBarHeight) {
+          maxBarHeight = timeSpent * 1.1;
         }
       }
       data.add(
         BarChartGroupData(x: i, barRods: [
           BarChartRodData(
-            toY: minutesSpent,
+            toY: timeSpent,
             color: color,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(2)),
             width: 15,
@@ -47,10 +52,15 @@ class _BarChartContentState extends State<BarChartContent> {
         ])
       );
     }
+    if (maxBarHeight >= secondsUntilDisplayedAsMinutes) {
+      showAsMinutes = true;
+    } else {
+      showAsMinutes = false;
+    }
     barChartData = data;
   }
 
-    void showAchievementPopup(BuildContext context) async {
+  void showAchievementPopup(BuildContext context) async {
     bool achievementPopupShown = await LocalUser.getGoalReacherAchievementPopupShown();
     if (!achievementPopupShown) {
       // ignore: use_build_context_synchronously
@@ -71,7 +81,23 @@ class _BarChartContentState extends State<BarChartContent> {
               BarChartData(
                 maxY: maxBarHeight,
                 barTouchData: BarTouchData(
-                  enabled: false
+                  enabled: true,
+                  touchTooltipData: BarTouchTooltipData(
+                    tooltipBgColor: Colors.black,
+                    tooltipPadding: const EdgeInsets.fromLTRB(12, 6, 12, 4),
+                    fitInsideVertically: true,
+                    getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                      int time = barChartData[groupIndex].barRods[rodIndex].toY.floor();
+                      String text = "";
+                      if (time >= 60) {
+                        text = "${(time ~/ 60).toStringAsFixed(0)} minutes ";
+                      }
+                      text += "${(time % 60).toStringAsFixed(0)} seconds";
+                      return BarTooltipItem(text, TextStyle(
+                        color: Colors.white,
+                      ));
+                    },
+                  ),
                 ),
                 barGroups: barChartData,
                 titlesData: FlTitlesData(
@@ -100,16 +126,17 @@ class _BarChartContentState extends State<BarChartContent> {
                     ),
                   ),
                   leftTitles: AxisTitles(
-                    axisNameWidget: const Text("Minutes"),
+                    axisNameWidget: Text(showAsMinutes ? "Minutes" : "Seconds"),
                     sideTitles: SideTitles(
-                      reservedSize: 28,
+                      reservedSize: 24,
                       getTitlesWidget: (value, _) {
-                        int digits = 1;
-                        if (maxBarHeight >= 10) digits = 0;
+                        if (showAsMinutes) {
+                          value /= 60;
+                        }
                         return SideTitleWidget(
                           space: 2,
                           axisSide: AxisSide.left,
-                          child: Text(value.toStringAsFixed(digits)),
+                          child: Text(value.toStringAsFixed(0)),
                         );
                       },
                       showTitles: true,
@@ -141,18 +168,12 @@ class _BarChartContentState extends State<BarChartContent> {
     return SizedBox(
       height: MediaQuery.of(context).size.height *
           0.45, // set a fixed height for the chart
-      width: MediaQuery.of(context).size.width * 0.8,
-      child: ListView.builder(
-        reverse:true,
-        scrollDirection: Axis.horizontal,
-        itemCount: 7,
-        itemBuilder: (context, index) {
-          return Container(
-              width: MediaQuery.of(context).size.width * 0.8,
-              height: MediaQuery.of(context).size.height *0.7,
-              padding: const EdgeInsets.only(top: 10),
-              child: chart);
-        },
+      width: MediaQuery.of(context).size.width * 0.9,
+      child: Container(
+          width: MediaQuery.of(context).size.width * 0.9,
+          height: MediaQuery.of(context).size.height *0.7,
+          padding: const EdgeInsets.fromLTRB(0, 10, 36, 0),
+          child: chart
       ),
     );
   }

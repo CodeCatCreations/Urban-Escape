@@ -53,6 +53,11 @@ class LocalUser {
     }
   }
 
+  static Future<void> resetTimeTracker() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(lastStopwatchTimeKey, 0);
+  }
+
   static Future<String> lastDayAppWasOpened() async {
     final prefs = await SharedPreferences.getInstance();
     String s = prefs.getString('last_opened_day') ??
