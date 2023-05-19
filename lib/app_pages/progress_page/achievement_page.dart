@@ -21,7 +21,7 @@ class _AchievementPageState extends State<AchievementPage> {
   final Achievement timeTrackerAchievement = Achievement(
       title: "Time-Tracker",
       description:
-          "To complete this achievement: \n\nGo to the stopwatch: Start the stopwatch and pause it",
+          "To complete this achievement: \n\nGo to the stopwatch: Start the stopwatch and pause it. Make sure to see your progress in the progress page as well!",
       maxLevel: 1,
       icon: const Icon(Icons.timer_rounded, color: Colors.green));
 
@@ -114,8 +114,8 @@ class _AchievementPageState extends State<AchievementPage> {
                 children: [
                   goalAchievement,
                   timeTrackerAchievement,
-                  soundsAchievement,
                   goalReacherAchievement,
+                  soundsAchievement,
                 ],
               ),
             ),
