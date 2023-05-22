@@ -19,7 +19,7 @@ class LocalUser {
   final blueIcon =
       BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue);
   final List<DateTime> _streakDates =
-      []; // a list to store the dates of the user's streaks.... Varför inte STATIC?????
+      []; 
 
   // This function loads the last saved stopwatch time from shared preferences.
   // It returns a Future<int>, which means that it will be completed with an integer value in the future.
@@ -51,6 +51,11 @@ class LocalUser {
       await prefs.setInt("time_spent_day_$i",
           0); // Sets the recorded time for all days of the week to 0.
     }
+  }
+
+  static Future<void> resetTimeTracker() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(lastStopwatchTimeKey, 0);
   }
 
   static Future<String> lastDayAppWasOpened() async {
@@ -204,4 +209,18 @@ class LocalUser {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     return prefs.getBool('sound_pop_up_shown') ?? false;
   }
+
+  static bool goalReacherAchievementPopupShown = false;
+
+  static Future<void> setGoalReacherAchievementPopupShown(bool value) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    goalReacherAchievementPopupShown = true;
+    await prefs.setBool('goal_reacher_pop_up_shown', value);
+  }
+
+  static Future<bool> getGoalReacherAchievementPopupShown() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getBool('goal_reacher_pop_up_shown') ?? false;
+  }
+
 }

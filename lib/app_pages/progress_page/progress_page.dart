@@ -52,6 +52,14 @@ class ProgressPageState extends State<ProgressPage> {
         });
       }
     });
+
+    LocalUser.getGoalReacherAchievementPopupShown().then((shown) {
+      if (shown) {
+        setState(() {
+          LocalUser.goalReacherAchievementPopupShown = true;
+        });
+      }
+    });
   }
 
   void loadWeeklyGoal() async {
@@ -99,11 +107,11 @@ class ProgressPageState extends State<ProgressPage> {
   Widget build(BuildContext context) {
     final TextEditingController textEditingController =
         TextEditingController(text: _goal.toString());
-    final PageController pageController = PageController();
+    final PageController myPageController = PageController();
 
     return PageView(
       scrollDirection: Axis.vertical,
-      controller: pageController,
+      controller: myPageController,
       children: [
         // First page
         Scaffold(
@@ -115,7 +123,8 @@ class ProgressPageState extends State<ProgressPage> {
                 colors: [Colors.blue, Colors.white],
               ),
             ),
-            child: ListView(
+            child: SingleChildScrollView(
+              child: Column(
               children: [
                Container(
                   decoration: BoxDecoration(
@@ -130,12 +139,28 @@ class ProgressPageState extends State<ProgressPage> {
                       Row(
                         children: [
                           TextButton.icon(
-                            icon: const Icon(Icons.flag, size: 35, color: Colors.black,),
+                            icon: Image.asset('assets/icons/target.png',
+                            width: 35,
+                            height: 35,
+                            color: Colors.black,
+                            ),
                             label: const Text(
                               'Set Goal',
-                              textScaleFactor: 1.2,
                               style: TextStyle(
+                                fontWeight: FontWeight.w500,
                                 color: Colors.black,
+                                fontSize: 16,
+                              ),
+                            ),
+                            style: ButtonStyle(
+                              elevation: MaterialStateProperty.all<double>(3),
+                              shape: MaterialStateProperty.all<OutlinedBorder>(
+                                RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                              ),
+                              backgroundColor: MaterialStateProperty.all<Color>(
+                                Colors.blue,
                               ),
                             ),
                             onPressed: () {
@@ -180,8 +205,11 @@ class ProgressPageState extends State<ProgressPage> {
                                                           int.tryParse(value) !=
                                                               null) {
                                                         if (int.parse(value) <
-                                                            1)
+                                                            1) {
                                                           return 'Goal must be more than 0 minutes!';
+                                                        } else if (int.parse(value) > 10080) {
+                                                          return 'Goal cannot be more than 10080 minutes!';
+                                                        }
                                                         return null;
                                                       }
                                                       return 'Requires a number without digits.';
@@ -225,14 +253,34 @@ class ProgressPageState extends State<ProgressPage> {
                           ),
                           Align(
                             alignment: Alignment.centerRight,
-                            child: IconButton(
-                              icon: const Icon(
-                                Icons.emoji_events,
-                                size: 35,
-                                color: Color.fromARGB(255, 226, 171, 7),
+                            child: TextButton.icon(
+                              icon: Image.asset(
+                                'assets/icons/achievement.png',
+                                width: 35,
+                                height: 35,
+                                color: const Color.fromARGB(255, 226, 171, 7),
                               ),
+                              label: const Text(
+                                'Achievements',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.black,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            style: ButtonStyle(
+                              elevation: MaterialStateProperty.all<double>(3),
+                              shape: MaterialStateProperty.all<OutlinedBorder>(
+                                RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                              ),
+                              backgroundColor: MaterialStateProperty.all<Color>(
+                                Colors.blue,
+                              ),
+                            ),
                               onPressed: () {
-                                pageController.animateToPage(
+                                myPageController.animateToPage(
                                   1,
                                   duration: const Duration(milliseconds: 1000),
                                   curve: Curves.ease,
@@ -242,10 +290,13 @@ class ProgressPageState extends State<ProgressPage> {
                           ),
                         ],
                       ),
-                      const Center(
-                        child: Text(
-                          'Weekly Progress',
-                          textScaleFactor: 1.4,
+                      const Padding(
+                        padding: EdgeInsets.only(top: 20),
+                        child: Center(
+                          child: Text(
+                            'Weekly Progress',
+                            textScaleFactor: 1.4,
+                          ),
                         ),
                       ),
                       Consumer<TimeData>(builder: (context, myData, child) {
@@ -287,7 +338,7 @@ class ProgressPageState extends State<ProgressPage> {
                         }),
                       ),
                       const ChartContainer(
-                        title: 'Daily goal',
+                        title: 'Daily Progress',
                         color: Color.fromARGB(255, 41, 128, 38),
                         chart: BarChartContent(),
                       ),
@@ -295,19 +346,13 @@ class ProgressPageState extends State<ProgressPage> {
                   ),
                 ),
               ],
+              ),
             ),
           ),
         ),
         // Second page
-        const AchievementPage(),
+        AchievementPage(pageController: myPageController),
       ],
     );
   }
-}
-
-class ActivityData {
-  final String day;
-  final int minutes;
-
-  const ActivityData(this.day, this.minutes);
 }

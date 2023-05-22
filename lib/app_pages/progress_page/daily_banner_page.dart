@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class ProgressBannerBar {
-  static void show(BuildContext context, String message, {Duration duration = const Duration(seconds: 10)}) {
+  static void show(BuildContext context, String message, {Duration duration = const Duration(seconds: 5)}) {
     final snackBar = SnackBar(
       content: Text(
         message,
