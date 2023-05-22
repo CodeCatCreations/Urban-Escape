@@ -1,0 +1,7 @@
+<!--<?xml version=1.0 encoding="utf-8"?>-->
+<resources>
+    <string name="app_name">Urban Escape</string>
+    <string name="facebook_app_id">745863613866792</string>
+    <string name="fb_login_protocol_scheme">fb745863613866792</string>
+    <string name="facebook_client_token">e2441bd9d2c1a69d315c7460ea98feca</string>
+</resources>
