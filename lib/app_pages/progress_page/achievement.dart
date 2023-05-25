@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+// ignore: must_be_immutable
 class Achievement extends GestureDetector {
   final String title;
   double percent = 0.0;
@@ -141,7 +142,7 @@ class Achievement extends GestureDetector {
                 onTap: () {
                   Navigator.of(context).pop();
                 },
-                child: Icon(Icons.close),
+                child: const Icon(Icons.close),
               ),
             ],
           ),

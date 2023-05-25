@@ -1,41 +1,48 @@
-import 'package:flutter/material.dart';
-import 'package:percent_indicator/percent_indicator.dart';
-import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:urban_escape_application/app_pages/progress_page/daily_banner_page.dart';
 import 'dart:async';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:percent_indicator/percent_indicator.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:urban_escape_application/database/local_user.dart';
 
 import '../../database/time_data.dart';
+import '../progress_page/daily_banner_page.dart';
+import 'time_tracking_page.dart';
 
-class TimeTrackingPage extends StatefulWidget {
-  const TimeTrackingPage({super.key});
+class TimeTracker {
+  late State<TimeTrackingPage> trackerPage;
 
-  @override
-  State<TimeTrackingPage> createState() => _TimeTrackingPageState();
-}
-
-class _TimeTrackingPageState extends State<TimeTrackingPage> {
   int _passedTime = 0;
+  get passedTime => _passedTime;
   double _percent = 0.0;
+  get percent => _percent;
   int _goal = 10;
   Timer _timer = Timer(Duration.zero, () {});
   bool click = true;
+
+  TimeTracker(State<TimeTrackingPage> trackingPage) {
+    trackerPage = trackingPage;
+    _timer.cancel();
+  }
   
   Future<void> loadLastStopwatchTime() async {
 
     final lastTimeUserStoppedTheTime = await LocalUser.loadStopwatchTime();
 
     // In setState we set the state of the widget with the loaded stopwatch time and the percent of the goal achieved
-    setState(() {
-      _passedTime = lastTimeUserStoppedTheTime;
     
-      reloadPercent();
-    });
+    _passedTime = lastTimeUserStoppedTheTime;
+    
+    await reloadPercent();
   }
 
   Future<void> loadCurrentGoal() async {
-    final currentWeeklyGoal = await Provider.of<TimeData>(context, listen: false).loadWeeklyGoal();
+    int currentWeeklyGoal;
+    if (trackerPage.mounted) {
+      currentWeeklyGoal = await Provider.of<TimeData>(trackerPage.context, listen: false).loadWeeklyGoal();
+    } else {
+      currentWeeklyGoal = await LocalUser.loadWeeklyGoal();
+    }
 
     
     _goal = 60 * currentWeeklyGoal ~/ 7;
@@ -60,20 +67,24 @@ class _TimeTrackingPageState extends State<TimeTrackingPage> {
             : Duration(seconds: _passedTime).inSeconds.toDouble() / (_goal * 100);
   }
 
-  void loadLastDayAppOpened() async {
+  Future<void> loadLastDayAppOpened() async {
     String lastDayAppOpened = await LocalUser.lastDayAppWasOpened();
     if (lastDayAppOpened != DateTime.now().day.toString()) {
       resetTimer();
+      final prefs = await SharedPreferences.getInstance();
+      prefs.setString(
+        LocalUser.lastDayOpenedKey,
+        DateTime.now()
+            .day
+            .toString()); // Sets the value of last_opened_day to today.
       if (DateTime.now().day == DateTime.monday) {
         LocalUser.resetRecordedTimeWeekday();
       }
     } 
   }
 
-  @override
-  void initState() {
-    super.initState();
-    loadLastDayAppOpened();
+  void initState() async {
+    await loadLastDayAppOpened();
     
     loadLastStopwatchTime();
   }
@@ -81,27 +92,25 @@ class _TimeTrackingPageState extends State<TimeTrackingPage> {
   void startTimer() {
     if (_timer.isActive) return;
     _timer = Timer.periodic(const Duration(milliseconds: 100), (timer) async {
-      double percent = await getPercent();
-      setState(() {
-        _passedTime += 10;
-        _percent = percent;
-      });
-      Provider.of<TimeData>(context, listen: false).updateStopTimerMS(_passedTime);
+      _passedTime += 10;
+      if (trackerPage.mounted) {
+        Provider.of<TimeData>(trackerPage.context, listen: false).updateStopTimerMS(_passedTime);
+      }
+      final percent = await getPercent();
+      _percent = percent;
     });
   }
 
-  void stopTimer(BuildContext context) {
+  void stopTimer() {
     _timer.cancel();
     // Save the current stopwatch time to shared_preferences when stopped
     saveLastStopwatchTime(_passedTime);
-    showAchievementPopup(context);
+    showAchievementPopup();
   }
 
   void resetTimer() async {
-    setState(() {
-      _passedTime = 0;
-      _percent = 0;
-    });
+    _passedTime = 0;
+    _percent = 0;
     // Reset the saved stopwatch time in shared_preferences
     await LocalUser.resetTimeTracker();
   }
@@ -111,17 +120,18 @@ class _TimeTrackingPageState extends State<TimeTrackingPage> {
     return "${duration.inMinutes.remainder(60).toString().padLeft(2, '0')}:${(duration.inSeconds.remainder(60)).toString().padLeft(2, '0')}";
   }
 
-  void showAchievementPopup(BuildContext context) async {
+  void showAchievementPopup() async {
     bool achievementPopupShown = await LocalUser.getTimerAchievementPopupShown();
     if (!achievementPopupShown) {
       // ignore: use_build_context_synchronously
-      ProgressBannerBar.show(
-          context, 'Congrats! You have just passed an achievement!');
+      if (trackerPage.mounted) {
+        ProgressBannerBar.show(
+          trackerPage.context, 'Congrats! You have just passed an achievement!');
+      }
     }
     LocalUser.setTimerAchievementPopupShown(true);
   }
 
-  @override
   Widget build(BuildContext context) {
     Provider.of<TimeData>(context, listen: true).weeklyGoal;
     return Container(
@@ -157,7 +167,7 @@ class _TimeTrackingPageState extends State<TimeTrackingPage> {
                   lineWidth: 20.0,
                   backgroundWidth: 15,
                   animation: true,
-                  animationDuration: 10,
+                  animationDuration: 100,
                   animateFromLastPercent: true,
                   percent: _percent,
                   circularStrokeCap: CircularStrokeCap.round,
@@ -178,7 +188,7 @@ class _TimeTrackingPageState extends State<TimeTrackingPage> {
                           ),
                         ),
                         Text(
-                          "Daily progress: " + (_percent*100).toInt().toString()+"%",
+                          "Daily progress: ${(_percent*100).toInt().toString()}%",
                           style: const TextStyle(
                             fontSize: 20.0,
                             color: Colors.white,
@@ -188,15 +198,14 @@ class _TimeTrackingPageState extends State<TimeTrackingPage> {
                           alignment: Alignment.bottomCenter,
                           iconSize: 100,
                           onPressed: () {
-                            setState(() {
+                            // ignore: invalid_use_of_protected_member
+                            trackerPage.setState(() {
                               if (click) {
                                 _showConfirmationDialog();
                               } else {
                                 click = !click;
-                                stopTimer(context);
+                                stopTimer();
                               }
-                              //click = !click;
-                              //(click == false) ? startTimer() : stopTimer(context);
                             });
                           },
                           icon: Icon((click == false) ? Icons.pause_circle_filled :
@@ -224,48 +233,47 @@ class _TimeTrackingPageState extends State<TimeTrackingPage> {
       return;
     }
     
-  // ignore: use_build_context_synchronously
-  return showDialog<void>(
-    context: context,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        title: const Text('Start Time Tracker?'),
-        content:  SingleChildScrollView(
-          child: ListBody(
-            children: const <Widget>[
-              Text('Are you sure you want to start tracking your time? Once time has been tracked, you cannot remove it.'),
-              Text('\nWhen you are finished tracking, press the pause button.'),
-            ],
+    // ignore: use_build_context_synchronously
+    return showDialog<void>(
+      context: trackerPage.context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Start Time Tracker?'),
+          content: const SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text('Are you sure you want to start tracking your time? Once time has been tracked, you cannot remove it.'),
+                Text('\nWhen you are finished tracking, press the pause button.'),
+              ],
+            ),
           ),
-        ),
-        actions: <Widget>[
-          TextButton(
-            child: const Text('Cancel'),
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-          ),
-          TextButton(
-            child: const Text('Continue'),
-            onPressed: () {
-              click = !click;
-              startTimer();
-              Navigator.of(context).pop();
-            },
-          ),
-          TextButton(
-            child: const Text('Continue and do not show this again'),
-            onPressed: () {
-              click = !click;
-              startTimer();
-              prefs.setBool('doNotshowConfirmation', true);
-              Navigator.of(context).pop();
-            },
-          )
-        ],
-      );
-    },
-  );
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('Continue'),
+              onPressed: () {
+                click = !click;
+                startTimer();
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('Continue and do not show this again'),
+              onPressed: () {
+                click = !click;
+                startTimer();
+                prefs.setBool('doNotshowConfirmation', true);
+                Navigator.of(context).pop();
+              },
+            )
+          ],
+        );
+      },
+    );
+  }
 }
-}
-          

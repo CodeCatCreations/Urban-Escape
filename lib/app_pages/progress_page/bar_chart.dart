@@ -128,7 +128,7 @@ class _BarChartContentState extends State<BarChartContent> {
                   leftTitles: AxisTitles(
                     axisNameWidget: Text(showAsMinutes ? "Minutes" : "Seconds"),
                     sideTitles: SideTitles(
-                      reservedSize: 24,
+                      reservedSize: 26,
                       getTitlesWidget: (value, _) {
                         if (showAsMinutes) {
                           value /= 60;
