@@ -198,6 +198,7 @@ class TimeTracker {
                           alignment: Alignment.bottomCenter,
                           iconSize: 100,
                           onPressed: () {
+                            // ignore: invalid_use_of_protected_member
                             trackerPage.setState(() {
                               if (click) {
                                 _showConfirmationDialog();

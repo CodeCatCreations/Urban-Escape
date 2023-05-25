@@ -35,99 +35,59 @@ class _AppScreenState extends State<AppScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return
-      ChangeNotifierProvider<TimeData>(
-          create: (context) => TimeData(),
-
-      child: Scaffold( //Returning a widget that contains the AppBar, the body and the BottomNavigationBar
-      appBar: AppBar(
-        centerTitle: true,
-        title: Text(
-          'Urban Escape',
-          style: GoogleFonts.pacifico(
-            textStyle: const TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.w100,
+    return ChangeNotifierProvider<TimeData>(
+      create: (context) => TimeData(),
+      child: Scaffold(
+        //Returning a widget that contains the AppBar, the body and the BottomNavigationBar
+        appBar: AppBar(
+          centerTitle: true,
+          title: Text(
+            'Urban Escape',
+            style: GoogleFonts.pacifico(
+              textStyle: const TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.w100,
+              ),
             ),
           ),
         ),
         /*
-        Adding an IconButton to the AppBar's leading that toggles 
-        the _showProgressBar variable when pressed and shows the ProgressBannerBar
-        */
-        /*
-        leading: IconButton(
-          onPressed: () {
-            setState(() {
-              _showProgressBar = !_showProgressBar;
-            });
-            ProgressBannerBar.show(context, 'You need 8 more minutes to achieve your daily goal');
-          },
-          icon: const Icon(Icons.bar_chart_sharp),
-        ),
-        */
-        /*
-         Adding an IconButton to the AppBar's actions 
-        that navigates to the SettingsPage when pressed
-        */
-        /*
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: ((context) => const SettingsPage())),
-              );
-            },
-          )
-        ],
-        */
-      ),
-      /*
       Creating an IndexedStack that contains the app pages and 
       updates the current index based on the tapped item
       */
-      body: IndexedStack(
-        index: _currentIndex,
-        children: _appPages,
+        body: IndexedStack(
+          index: _currentIndex,
+          children: _appPages,
+        ),
+
+        bottomNavigationBar: BottomNavigationBar(
+          type: BottomNavigationBarType.fixed,
+          currentIndex: _currentIndex,
+          selectedItemColor: Colors.blue,
+          unselectedItemColor: Colors.green,
+          onTap: (int index) {
+            _tappedItem(index);
+          },
+          items: const <BottomNavigationBarItem>[
+            BottomNavigationBarItem(
+              icon: Icon(Icons.show_chart),
+              label: 'Progress',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.map),
+              label: 'Map',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.music_note),
+              label: 'Sounds',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.timer_rounded),
+              label: 'Stopwatch',
+            ),
+          ],
+        ),
       ),
-
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        currentIndex: _currentIndex,
-        selectedItemColor: Colors.blue,
-        unselectedItemColor: Colors.green,
-        onTap: (int index) {
-          _tappedItem(index);
-        },
-
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.show_chart),
-            label: 'Progress',
-          ),
-
-          BottomNavigationBarItem(
-            icon: Icon(Icons.map),
-            label: 'Map',
-          ),
-
-          BottomNavigationBarItem(
-            icon: Icon(Icons.music_note),
-            label: 'Sounds',
-          ),
-
-          BottomNavigationBarItem(
-            icon: Icon(Icons.timer_rounded),
-            label: 'Stopwatch',
-          ),
-        ],
-      ),
-    ),
-
     );
-
-
   }
 }
