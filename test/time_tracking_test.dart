@@ -5,8 +5,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:urban_escape_application/database/local_user.dart';
 import 'package:urban_escape_application/app_pages/time_page/time_tracker.dart';
 import 'package:urban_escape_application/app_pages/time_page/time_tracking_page.dart';
-import 'package:urban_escape_application/database/time_data.dart';
-import 'package:urban_escape_application/main.dart';
 
 class MockSharedPreferences extends Mock implements SharedPreferences {}
 
