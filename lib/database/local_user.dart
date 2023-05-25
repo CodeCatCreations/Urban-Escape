@@ -15,6 +15,7 @@ class LocalUser {
   // We declare the variable to be static so that it belongs to the class and not to any instance of it.
   static const lastStopwatchTimeKey = 'last_stopwatch_time';
   static const weeklyGoalKey = 'weekly_goal';
+  static const lastDayOpenedKey = 'last_opened_day';
 
   final blueIcon =
       BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue);
@@ -60,13 +61,8 @@ class LocalUser {
 
   static Future<String> lastDayAppWasOpened() async {
     final prefs = await SharedPreferences.getInstance();
-    String s = prefs.getString('last_opened_day') ??
+    String s = prefs.getString(lastDayOpenedKey) ??
         ''; // Saves the last day the app was opened in a temporary string s.
-    await prefs.setString(
-        'last_opened_day',
-        DateTime.now()
-            .day
-            .toString()); // Sets the value of last_opened_day to today.
     return s; // Return the day the app was opened last, or '' if it has not been opened before.
   }
 

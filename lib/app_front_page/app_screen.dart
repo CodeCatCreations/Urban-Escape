@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../app_pages/progress_page/progress_page.dart';
-import '../app_pages/time_page/time_tracking.dart';
+import '../app_pages/time_page/time_tracking_page.dart';
 import '../app_pages/sounds_page.dart';
 import '../app_pages/map_pages/map_page.dart';
 import 'package:google_fonts/google_fonts.dart';
