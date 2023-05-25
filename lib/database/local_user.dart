@@ -14,13 +14,12 @@ class LocalUser {
   static Set<Marker> savedMarkers = {};
   // We declare the variable to be static so that it belongs to the class and not to any instance of it.
   static const lastStopwatchTimeKey = 'last_stopwatch_time';
+  static const timeSpentInDayKey = "time_spent_day_weekday";
   static const weeklyGoalKey = 'weekly_goal';
   static const lastDayOpenedKey = 'last_opened_day';
 
   final blueIcon =
       BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue);
-  final List<DateTime> _streakDates =
-      []; 
 
   // This function loads the last saved stopwatch time from shared preferences.
   // It returns a Future<int>, which means that it will be completed with an integer value in the future.
@@ -30,8 +29,6 @@ class LocalUser {
     return prefs.getInt(lastStopwatchTimeKey) ??
         0; // Return the saved time, or 0 if it's not present.
   }
-
-  bool hasGoal = false;
 
   static Future<void> saveStopwatchTime(int timeInMS) async {
     final prefs = await SharedPreferences.getInstance();
@@ -79,44 +76,10 @@ class LocalUser {
         weeklyGoalKey, goal); //Save the new weekly goal to shared preferences.
   }
 
-  void addStreakDate(DateTime date) {
-    _streakDates.add(date);
-  }
-
-  // a method to get the user's current streak
-  int getCurrentStreak() {
-    int streak = 0;
-    DateTime today = DateTime.now();
-    while (_streakDates.contains(today.subtract(Duration(days: streak)))) {
-      streak++;
-    }
-    return streak;
-  }
-
-  void setGoal() {
-    hasGoal = true;
-    SharedPreferences.getInstance().then((prefs) {
-      prefs.setBool('has_goal', hasGoal);
-    });
-  }
-
-  bool goalAdded() {
-    return hasGoal;
-  }
-
   // a method to save the user's streak data to local storage
   Future<void> saveData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    saveDates(prefs);
     saveMarkers(prefs);
-
-    prefs.setBool('has_goal', hasGoal);
-  }
-
-  void saveDates(SharedPreferences prefs) async {
-    List<String> dates =
-        _streakDates.map((date) => date.toIso8601String()).toList();
-    await prefs.setStringList('streak_dates', dates);
   }
 
   void saveMarkers(SharedPreferences prefs) async {
@@ -136,14 +99,7 @@ class LocalUser {
   // a method to load the user's streak data from local storage
   Future<void> loadData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    loadDates(prefs);
     loadMarkers(prefs);
-  }
-
-  void loadDates(SharedPreferences prefs) {
-    List<String> dates = prefs.getStringList('streak_dates') ?? [];
-    _streakDates.clear();
-    _streakDates.addAll(dates.map((date) => DateTime.parse(date)));
   }
 
   void loadMarkers(SharedPreferences prefs) {
@@ -163,8 +119,6 @@ class LocalUser {
       );
       savedMarkers.add(marker);
     }
-
-    hasGoal = prefs.getBool('has_goal') ?? false;
   }
 
   static bool goalAchievementPopUpHasBeenShown = false;

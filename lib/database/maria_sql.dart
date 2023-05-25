@@ -33,6 +33,11 @@ class MariaDB {
     final results =
         await conn.query('SELECT id, name, latitude, longitude FROM parks');
     await conn.close();
+    
+    if (results.isEmpty) {
+      return [];
+    }
+
     return results
         .map((row) => {
               'id': row['id'],
